@@ -1,7 +1,7 @@
 <?php
 
 
-namespace DaCode\DaStats;
+namespace DaCode\DaStats\Stores;
 
 use DaCode\DaStats\Contracts\StatsInterface;
 use DaCode\DaStats\Enum\StatsType;
@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
-class DatabaseStatsRepository implements StatsInterface
+class DatabaseStatsStore implements StatsInterface
 {
     /**
      * @var string

@@ -3,6 +3,7 @@
 
 namespace DaCode\DaStats;
 
+use DaCode\DaStats\Stores\DatabaseStatsStore;
 use InvalidArgumentException;
 
 class StatsManager
@@ -67,10 +68,10 @@ class StatsManager
     /**
      * Database storage
      *
-     * @return DatabaseStatsRepository
+     * @return DatabaseStatsStore
      */
     private function createDatabaseStorage(){
-        return new DatabaseStatsRepository($this->createModel());
+        return new DatabaseStatsStore($this->createModel());
     }
 
     /**
