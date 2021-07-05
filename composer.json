@@ -1,0 +1,37 @@
+{
+    "name": "dacode/dastats",
+    "description": "Statistics or matrics generator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "radiatecode",
+            "email": "radiate126@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.18",
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "DaCode\\DaStats\\" : "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DaCode\\DaStats\\tests\\" : "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers" : [
+                "DaCode\\DaStats\\StatsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}
