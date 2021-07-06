@@ -158,7 +158,7 @@ class DatabaseStatsStore implements StatsInterface
         if ($decrement == 0) {
             $stats->delete();
 
-            return false;
+            return true;
         }
 
         $stats->update(['value' => $decrement]);
