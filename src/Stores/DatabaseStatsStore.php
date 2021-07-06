@@ -84,88 +84,56 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * Increment for specific key
+     * Increment 1 for specific key
+     *
+     * @return mixed
+     */
+    public function increment(): bool
+    {
+        return $this->addition(1);
+    }
+
+    /**
+     * Decrement 1 for specific key
      *
      * @return bool
      */
-    public function increment(): ?bool
+    public function decrement(): bool
     {
+        return $this->subtraction(1);
+    }
+
+    /**
+     * Addition for given key
+     *
+     * @param  int  $value
+     *
+     * @return bool
+     */
+    public function addition(int $value): bool
+    {
+        $this->metaDataException();
+
         $stats = $this->find();
 
         if (empty($stats)) {
             $this->model->create(
                 [
-                    'isolation_id'   => $this->isolation_id,
-                    'isolation_name' => $this->isolation_name,
+                    'isolation_id'   => $this->isolate ? $this->isolation_id : null,
+                    'isolation_name' => $this->isolate ? $this->isolation_name : null,
                     'title'          => $this->title,
                     'key'            => $this->key,
-                    'value'          => 1,
-                    'type'           => StatsType::COUNTABLE,
+                    'value'          => $value,
+                    'type'           => $value == 1 ? StatsType::COUNTABLE : StatsType::SUMMATION,
                 ]
             );
 
             return true;
         }
 
-        $stats->update(['value' => (int) $stats->value + 1]);
+        $stats->update(['value' => (int) $stats->value + $value]);
 
         return true;
-    }
-
-    /**
-     * Decrement for specific stats key
-     *
-     * @return bool|null
-     */
-    public function decrement(): ?bool
-    {
-        $stats = $this->find();
-
-        if (empty($stats)) {
-            return false;
-        }
-
-        $decrement = (int) $stats->value - 1;
-
-        if ($decrement == 0) {
-            $stats->delete();
-
-            return true;
-        }
-
-        $stats->update(['value' => $decrement]);
-
-        return true;
-    }
-
-    /**
-     * Addition for given key
-     *
-     * @return mixed
-     */
-    public function addition(int $value)
-    {
-        $this->metaDataException();
-
-        $old = $this->find();
-
-        if ( ! empty($old)) {
-            return $old->update([
-                'value' => (int) $old->value + $value,
-            ]);
-        }
-
-        return $this->model->create(
-            [
-                'isolation_id'   => $this->isolate ? $this->isolation_id : 0,
-                'isolation_name' => $this->isolate ? $this->isolation_name
-                    : null,
-                'key'            => $this->key,
-                'title'          => $this->title,
-                'value'          => $value,
-                'type'           => StatsType::SUMMATION,
-            ]
-        );
     }
 
     /**
@@ -173,29 +141,29 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @param  int  $value
      *
-     * @return mixed|null
+     * @return bool
      */
-    public function subtraction(int $value)
+    public function subtraction(int $value): bool
     {
         $this->metaDataException();
 
-        $old = $this->find();
+        $stats = $this->find();
 
-        if ( ! empty($old)) {
-            $result = (int) $old->value - $value;
-
-            if ($result == 0) {
-                $old->delete();
-
-                return null;
-            }
-
-            return $old->update([
-                'value' => (int) $old->value - $value,
-            ]);
+        if (empty($stats)) {
+            return false;
         }
 
-        return null;
+        $decrement = (int) $stats->value - $value;
+
+        if ($decrement == 0) {
+            $stats->delete();
+
+            return false;
+        }
+
+        $stats->update(['value' => $decrement]);
+
+        return true;
     }
 
     /**

@@ -9,13 +9,13 @@ interface StatsInterface
 
     public function key(string $key): StatsInterface;
 
-    public function increment(): ?bool;
+    public function increment(): bool;
     
-    public function decrement(): ?bool;
+    public function decrement(): bool;
 
-    public function addition(int $value);
+    public function addition(int $value): bool;
 
-    public function subtraction(int $value);
+    public function subtraction(int $value): bool;
 
     public function statsByType(string $type): StatsInterface;
 

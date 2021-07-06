@@ -2,11 +2,11 @@
 
 ![Stats](img/stats.png)
 
-This package is a lightweight solution to record and view the statistics for the dashboard or reports. Sometimes we need **KPI**/ **Matrics** / **Statistics** in our **Dashboard** Or **Reports**, to create those statistics we need to go through lots of calculation, query between tables, rows etc. But using the package helps you to make statistics in nicer way, the statistics stored in a **single db table**, so it would be faster or easier to retrieve.
+This package is a lightweight solution to record and view the statistics for the dashboard or reports. Sometimes we need **KPI** / **Metrics** / **Statistics** in our **Dashboard** Or **Reports**, to create those statistics we need to go through lots of calculation, query between tables, rows etc. But using the package helps you to make statistics in nicer way, the statistics stored in a **single db table**, so it would be faster or easier to retrieve.
 
 
 # Examples
-We see that lots of dashboard have statistic widget like total customer, total user, total pending orders, total sales etc.
+Lots of dashboard have statistic widget like total customer, total user, total pending orders, total sales etc.
 For these statistics widget sql query apply between tables, rows and apply mathematical equation (plus, minus, count etc.) to get the single
 unified numeric value. 
 
