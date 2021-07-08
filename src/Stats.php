@@ -55,83 +55,41 @@ class Stats
     }
 
     /**
-     * @return mixed
+     * @param  int  $value
+     *
+     * @return bool
      */
-    public function increment()
+    public function increase(int $value = 1): bool
     {
-        return $this->storage->increment();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function decrement()
-    {
-        return $this->storage->decrement();
+        return $this->storage->increase($value);
     }
 
     /**
      * @param  int  $value
      *
-     * @return mixed
+     * @return bool
      */
-    public function addition(int $value)
+    public function increaseOrReplace(int $value): bool
     {
-        return $this->storage->addition($value);
+        return $this->storage->increaseOrReplace($value);
     }
 
     /**
      * @param  int  $value
      *
-     * @return mixed
+     * @return bool
      */
-    public function subtraction(int $value)
+    public function decrease(int $value = 1): bool
     {
-        return $this->storage->subtraction($value);
-    }
-
-    /**
-     * @param ...$titles
-     *
-     * @return $this
-     */
-    public function statsByTitles(...$titles): Stats
-    {
-        $this->storage->statsByTitles($titles);
-
-        return $this;
+        return $this->storage->decrease($value);
     }
 
     /**
      * @return $this
      */
-    public function statsByKeys(...$key): Stats
+    public function inKeys(...$key): Stats
     {
-        $this->storage->statsByKeys($key);
-
-        return $this;
-    }
-
-    /**
-     * @param  string  $type
-     *
-     * @return $this
-     */
-    public function statsByType(string $type): Stats
-    {
-        $this->storage->statsByType($type);
-
-        return $this;
-    }
-
-    /**
-     * @param  string  $key
-     *
-     * @return $this
-     */
-    public function contains(string $key): Stats
-    {
-        $this->storage->contains($key);
+        $this->storage->inKeys($key);
 
         return $this;
     }
@@ -168,7 +126,7 @@ class Stats
      *
      * @return $this
      */
-    public function join(string $table,string $pk,array $select = []): Stats
+    public function join(string $table,string $pk = 'id',array $select = []): Stats
     {
         $this->storage->join($table,$pk,$select);
 
@@ -176,12 +134,12 @@ class Stats
     }
 
     /**
-     * @param $id
+     * @param int|null $id
      *
-     * @return mixed
+     * @return bool
      */
-    public function remove($id = null){
-        return $this->storage->removeStats($id);
+    public function remove(int $id = null): bool{
+        return $this->storage->remove($id);
     }
 
     /**
@@ -191,9 +149,9 @@ class Stats
      * @param  callable  $callback
      * @param  callable|null  $default
      *
-     * @return $this|Stats|mixed
+     * @return $this|mixed
      */
-    public function when(bool $value, callable $callback, callable $default = null)
+    public function when(bool $value, callable $callback, callable $default = null): Stats
     {
         if ($value) {
             return $callback($this) ?: $this;

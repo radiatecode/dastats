@@ -16,7 +16,6 @@ class CreateDaStatsTable extends Migration{
             $table->id();
             $table->integer('isolation_id')->nullable();
             $table->string('isolation_name')->nullable();
-            $table->enum('type',['Countable','Summation'])->default('Countable');
             $table->string('title');
             $table->string('key');
             $table->string('value');

@@ -5,27 +5,21 @@ namespace DaCode\DaStats\Contracts;
 
 interface StatsInterface
 {
+    public function isolate(string $name, int $id): StatsInterface;
+
     public function title(string $title): StatsInterface;
 
     public function key(string $key): StatsInterface;
 
-    public function increment(): bool;
-    
-    public function decrement(): bool;
+    public function increase(int $value): bool;
 
-    public function addition(int $value): bool;
+    public function decrease(int $value): bool;
 
-    public function subtraction(int $value): bool;
+    public function increaseOrReplace(int $value): bool;
 
-    public function statsByType(string $type): StatsInterface;
+    public function inKeys(...$keys): StatsInterface;
 
-    public function statsByTitles(array $titles): StatsInterface;
-
-    public function statsByKeys(array $keys): StatsInterface;
-
-    public function contains(string $key): StatsInterface;
-
-    public function isolate(string $name, int $id);
+    public function join(string $table,string $pk = 'id',array $select = []): StatsInterface;
 
     public function find();
 
@@ -33,5 +27,5 @@ interface StatsInterface
 
     public function get();
 
-    public function removeStats(int $id = null): bool;
+    public function remove(int $id = null): bool;
 }

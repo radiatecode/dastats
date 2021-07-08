@@ -4,11 +4,11 @@
 namespace DaCode\DaStats\Stores;
 
 use DaCode\DaStats\Contracts\StatsInterface;
-use DaCode\DaStats\Enum\StatsType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
 class DatabaseStatsStore implements StatsInterface
@@ -52,7 +52,7 @@ class DatabaseStatsStore implements StatsInterface
     {
         $this->model = $model;
 
-        $this->query();
+        $this->query = $model->newQuery();
     }
 
     /**
@@ -84,66 +84,36 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * Increment 1 for specific key
-     *
-     * @return mixed
-     */
-    public function increment(): bool
-    {
-        return $this->addition(1);
-    }
-
-    /**
-     * Decrement 1 for specific key
-     *
-     * @return bool
-     */
-    public function decrement(): bool
-    {
-        return $this->subtraction(1);
-    }
-
-    /**
-     * Addition for given key
+     * Add stats value
      *
      * @param  int  $value
      *
      * @return bool
      */
-    public function addition(int $value): bool
+    public function increase(int $value): bool
     {
-        $this->metaDataException();
-
-        $stats = $this->find();
-
-        if (empty($stats)) {
-            $this->model->create(
-                [
-                    'isolation_id'   => $this->isolate ? $this->isolation_id : null,
-                    'isolation_name' => $this->isolate ? $this->isolation_name : null,
-                    'title'          => $this->title,
-                    'key'            => $this->key,
-                    'value'          => $value,
-                    'type'           => $value == 1 ? StatsType::COUNTABLE : StatsType::SUMMATION,
-                ]
-            );
-
-            return true;
-        }
-
-        $stats->update(['value' => (int) $stats->value + $value]);
-
-        return true;
+        return $this->upsert($value,__FUNCTION__);
     }
 
     /**
-     * Subtraction from given existing stats
+     * @param  int  $value
+     *
+     * @return bool
+     */
+    public function increaseOrReplace(int $value): bool
+    {
+        return $this->upsert($value,__FUNCTION__);
+    }
+
+
+    /**
+     * Subtract stats value
      *
      * @param  int  $value
      *
      * @return bool
      */
-    public function subtraction(int $value): bool
+    public function decrease(int $value): bool
     {
         $this->metaDataException();
 
@@ -151,6 +121,10 @@ class DatabaseStatsStore implements StatsInterface
 
         if (empty($stats)) {
             return false;
+        }
+
+        if ($stats->value < $value || $value < 0){
+            throw new InvalidArgumentException('Subtract value is Out of Bounds!');
         }
 
         $decrement = (int) $stats->value - $value;
@@ -167,65 +141,17 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * Get stats by type
-     *
-     * @param  string  $type
-     *
-     * @return $this|mixed
-     */
-    public function statsByType(string $type): StatsInterface
-    {
-        $query = $this->query ?: $this->query();
-
-        $this->query = $query->where('type', '=', $type)->orderByDesc('id');
-
-        return $this;
-    }
-
-    /**
-     * Get stats by titles
-     *
-     * @param  array  $titles
-     *
-     * @return $this|mixed
-     */
-    public function statsByTitles(array $titles): StatsInterface
-    {
-        $query = $this->query ?: $this->query();
-
-        $this->query = $query->whereIn('title', $titles)->orderByDesc('id');
-
-        return $this;
-    }
-
-    /**
      * Get stats by keys
      *
-     * @param  array  $keys
+     * @param  $keys
      *
      * @return $this|mixed
      */
-    public function statsByKeys(array $keys): StatsInterface
+    public function inKeys(...$keys): StatsInterface
     {
-        $query = $this->query ?: $this->query();
+        $keys = Arr::flatten($keys);
 
-        $this->query = $query->whereIn('key', $keys)->orderByDesc('id');
-
-        return $this;
-    }
-
-    /**
-     * Get stats by containing given key
-     *
-     * @param  string  $key
-     *
-     * @return $this|mixed
-     */
-    public function contains(string $key): StatsInterface
-    {
-        $query = $this->query ?: $this->query();
-
-        $this->query = $query->where('key', 'like', '%'.$key.'%');
+        $this->query = $this->query->whereIn('key', $keys);
 
         return $this;
     }
@@ -235,9 +161,7 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function find()
     {
-        return $this->query()->when($this->title, function ($query) {
-            return $query->where('title', $this->title);
-        })->where('key', '=', $this->key)->first();
+        return $this->query()->first();
     }
 
     /**
@@ -249,9 +173,7 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function paginate(int $perPage)
     {
-        return $this->query
-            ? $this->query->orderByDesc('id')->paginate($perPage)
-            : $this->query()->orderByDesc('id')->paginate($perPage);
+        return $this->query()->orderByDesc('id')->paginate($perPage);
     }
 
     /**
@@ -259,9 +181,7 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function get()
     {
-        return $this->query
-            ? $this->query->get()
-            : $this->query()->orderByDesc('id')->get();
+        return $this->query()->orderByDesc('id')->get();
     }
 
     /**
@@ -271,11 +191,9 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @return $this
      */
-    public function join(string $table, string $pk, array $select = [])
+    public function join(string $table, string $pk = 'id', array $select = []): StatsInterface
     {
-        $query = $this->query ?: $this->query();
-
-        $this->query = $query->join($table, $table.'.'.$pk, '=', 'da_stats.key')
+        $this->query = $this->query->join($table, $table.'.'.$pk, '=', 'da_stats.key')
             ->when(! empty($select), function ($query) use ($select) {
                 return $query->select(array_merge(['da_stats.*'], $select));
             });
@@ -307,11 +225,19 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @return bool
      */
-    public function removeStats(int $id = null): bool
+    public function remove(int $id = null): bool
     {
-        return $id
-            ? $this->model::findOrFail($id)->delete()
-            : $this->find()->delete();
+        if ($id){
+            return $this->model::findOrFail($id)->delete();
+        }
+
+        $stats = $this->find();
+
+        if (! $stats->isEmpty()){
+            return $stats->delete();
+        }
+
+        return false;
     }
 
     /**
@@ -335,10 +261,46 @@ class DatabaseStatsStore implements StatsInterface
      */
     private function query(): Builder
     {
-        $query = $this->model->newQuery();
-
-        return $query->when($this->isolate, function ($query) {
+        return $this->query->when($this->isolate, function ($query) {
             return $query->where('isolation_id', $this->isolation_id);
+        })->when($this->title, function ($query) {
+            return $query->where('title', $this->title);
+        })->when($this->key, function ($query) {
+            return $query->where('key', $this->key);
         });
+    }
+
+    /**
+     * @param  int  $value
+     * @param  string  $action
+     *
+     * @return bool
+     */
+    private function upsert(int $value,string $action): bool{
+        $this->metaDataException();
+
+        if ($value <= 0){
+            throw new InvalidArgumentException('Value should be greater than 0!');
+        }
+
+        $stats = $this->find();
+
+        if (empty($stats)) {
+            $this->model->create(
+                [
+                    'isolation_id'   => $this->isolate ? $this->isolation_id : null,
+                    'isolation_name' => $this->isolate ? $this->isolation_name : null,
+                    'title'          => $this->title,
+                    'key'            => $this->key,
+                    'value'          => $value
+                ]
+            );
+
+            return true;
+        }
+
+        $stats->update(['value' => $action == 'increaseOrReplace' ? $value : (int) $stats->value + $value]);
+
+        return true;
     }
 }
