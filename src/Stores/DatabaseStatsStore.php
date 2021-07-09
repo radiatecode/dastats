@@ -4,11 +4,13 @@
 namespace DaCode\DaStats\Stores;
 
 use DaCode\DaStats\Contracts\StatsInterface;
+use DaCode\DaStats\Jobs\StatsJob;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class DatabaseStatsStore implements StatsInterface
@@ -52,7 +54,7 @@ class DatabaseStatsStore implements StatsInterface
     {
         $this->model = $model;
 
-        $this->query = $model->newQuery();
+        $this->setModelQuery();
     }
 
     /**
@@ -92,7 +94,7 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function increase(int $value): bool
     {
-        return $this->upsert($value,__FUNCTION__);
+        return $this->upsert($value, __FUNCTION__);
     }
 
     /**
@@ -100,9 +102,9 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @return bool
      */
-    public function increaseOrReplace(int $value): bool
+    public function replace(int $value): bool
     {
-        return $this->upsert($value,__FUNCTION__);
+        return $this->upsert($value, __FUNCTION__);
     }
 
 
@@ -123,7 +125,7 @@ class DatabaseStatsStore implements StatsInterface
             return false;
         }
 
-        if ($stats->value < $value || $value < 0){
+        if ($stats->value < $value || $value < 0) {
             throw new InvalidArgumentException('Subtract value is Out of Bounds!');
         }
 
@@ -138,6 +140,39 @@ class DatabaseStatsStore implements StatsInterface
         $stats->update(['value' => $decrement]);
 
         return true;
+    }
+
+    /**
+     * Do many increase/ decrease / replace at a time
+     *
+     * @param  string  $action
+     * @param  array  $data
+     *
+     * @return bool
+     */
+    public function doMany(string $action, array $data): bool
+    {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+            throw new InvalidArgumentException('Unknown action!');
+        }
+
+        $method = strtolower($action);
+
+        if (method_exists($this, $method)) {
+            foreach ($data as $item) {
+                if (array_key_exists('key', $item) && array_key_exists('value', $item)) {
+                    $this->key($item['key']);
+
+                    $this->{$method}($item['value']);
+
+                    $this->setModelQuery(); // reset the query so that it doesn't chain with previous query
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -191,9 +226,13 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @return $this
      */
-    public function join(string $table, string $pk = 'id', array $select = []): StatsInterface
-    {
-        $this->query = $this->query->join($table, $table.'.'.$pk, '=', 'da_stats.key')
+    public function join(
+        string $table,
+        string $pk = 'id',
+        array $select = []
+    ): StatsInterface {
+        $this->query = $this->query->join($table, $table.'.'.$pk, '=',
+            'da_stats.key')
             ->when(! empty($select), function ($query) use ($select) {
                 return $query->select(array_merge(['da_stats.*'], $select));
             });
@@ -227,13 +266,13 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function remove(int $id = null): bool
     {
-        if ($id){
+        if ($id) {
             return $this->model::findOrFail($id)->delete();
         }
 
         $stats = $this->find();
 
-        if (! $stats->isEmpty()){
+        if ( ! $stats->isEmpty()) {
             return $stats->delete();
         }
 
@@ -271,15 +310,24 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
+     * set model new query
+     */
+    private function setModelQuery()
+    {
+        $this->query = $this->model->newQuery();
+    }
+
+    /**
      * @param  int  $value
      * @param  string  $action
      *
      * @return bool
      */
-    private function upsert(int $value,string $action): bool{
+    private function upsert(int $value, string $action): bool
+    {
         $this->metaDataException();
 
-        if ($value <= 0){
+        if ($value <= 0) {
             throw new InvalidArgumentException('Value should be greater than 0!');
         }
 
@@ -288,18 +336,23 @@ class DatabaseStatsStore implements StatsInterface
         if (empty($stats)) {
             $this->model->create(
                 [
-                    'isolation_id'   => $this->isolate ? $this->isolation_id : null,
-                    'isolation_name' => $this->isolate ? $this->isolation_name : null,
-                    'title'          => $this->title,
-                    'key'            => $this->key,
-                    'value'          => $value
+                    'isolation_id' => $this->isolate ? $this->isolation_id
+                        : null,
+                    'isolation_name' => $this->isolate ? $this->isolation_name
+                        : null,
+                    'title' => $this->title,
+                    'key' => $this->key,
+                    'value' => $value,
                 ]
             );
 
             return true;
         }
 
-        $stats->update(['value' => $action == 'increaseOrReplace' ? $value : (int) $stats->value + $value]);
+        $stats->update([
+            'value' => $action == 'replace' ? $value
+                : (int) $stats->value + $value,
+        ]);
 
         return true;
     }

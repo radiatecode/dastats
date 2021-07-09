@@ -2,6 +2,8 @@
 
 namespace DaCode\DaStats;
 
+use DaCode\DaStats\Jobs\StatsJob;
+
 class Stats
 {
     /**
@@ -69,9 +71,9 @@ class Stats
      *
      * @return bool
      */
-    public function increaseOrReplace(int $value): bool
+    public function replace(int $value): bool
     {
-        return $this->storage->increaseOrReplace($value);
+        return $this->storage->replace($value);
     }
 
     /**
@@ -82,6 +84,20 @@ class Stats
     public function decrease(int $value = 1): bool
     {
         return $this->storage->decrease($value);
+    }
+
+    /**
+     * Do many increase or decrease or replace at a time
+     *
+     * @param  string  $action // StatsAction::INCREASE or StatsAction::DECREASE or StatsAction::REPLACE
+     *
+     * @param  array  $data
+     *
+     * @return bool
+     */
+    public function doMany(string $action, array $data): bool
+    {
+        return $this->storage->doMany($data);
     }
 
     /**

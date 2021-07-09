@@ -4,6 +4,7 @@
 namespace DaCode\DaStats;
 
 use DaCode\DaStats\Stores\DatabaseStatsStore;
+use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 class StatsManager
@@ -36,7 +37,15 @@ class StatsManager
 
         $class = '\\'.ltrim($model, '\\');
 
-        return new $class;
+        $model = new $class;
+
+        if ($model instanceof Model){
+            return $model;
+        }
+
+        throw new InvalidArgumentException(
+            "Given model class is not an instance of [Illuminate\Database\Eloquent\Model]"
+        );
     }
 
     /**

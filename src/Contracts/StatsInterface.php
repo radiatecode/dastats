@@ -15,7 +15,9 @@ interface StatsInterface
 
     public function decrease(int $value): bool;
 
-    public function increaseOrReplace(int $value): bool;
+    public function replace(int $value): bool;
+
+    public function doMany(string $action,array $data): bool;
 
     public function inKeys(...$keys): StatsInterface;
 

@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \DaCode\DaStats\Stats|mixed when(bool $value, callable $callback, callable $default = null)
  * @method static mixed increase(int $value = 1)
  * @method static mixed decrease(int $value = 1)
- * @method static mixed increaseOrReplace(int $value)
+ * @method static mixed replace(int $value)
+ * @method static mixed doMany(string $action, array $data): bool
  * @method static mixed find()
  * @method static mixed paginate(int $perPage = 10)
  * @method static mixed get()
