@@ -2,21 +2,22 @@
 
 ![Stats](img/stats.png)
 
-This package is a lightweight solution to record and view the statistics for the dashboard or reports. Sometimes we need **KPI** / **Metrics** / **Statistics** in our **Dashboard** Or **Reports**, to create those statistics we need to go through lots of calculation, query between tables, rows etc. But using the package helps you to make statistics in nicer way, the statistics stored in a **single db table**, so it would be faster or easier to retrieve.
+This package is a lightweight solution to record and view the statistics for the dashboard or reports. Sometimes we need **KPI** / **Metrics** / **Statistics** in our **Dashboard** Or **Reports**, to create those statistics we need to go through lots of calculation, queries etc. But this package may helps you to make statistics in nicer way, the statistics stored in a **single db table**, so it would be faster or easier to retrieve.
 
 
 # Examples
-Lots of dashboard have statistic widget like total customer, total user, total pending orders, total sales etc.
-For these statistics widget sql query apply between tables, rows and apply mathematical equation (plus, minus, count etc.) to get the single
-unified numeric value. 
+Lots of dashboard or reports have statistic widget like total customer, total user, total pending orders, total sales etc.
+For these **statistic widgets** we applied query across tables, rows along with mathematical equation (plus, minus, count etc.) to get the single
+unified numeric value. For small database it's ok to query / calculate but for large database the calculation may hamper the performance or create complexity. So what if
+we could calculate the statistics during the **CRUD operation**.
 
 ![Stats](img/stats-samples.png)
 
-But now we can create our statistics easily by this package
+### Examples 1:
 
-Example:
+Total User Counting: 
 
-Total User:
+Increase a user whenever a new user is store, Decrease a user whenever user delete.
 
     use DaCode\DaStats\Facades\Stats;
     .......
@@ -25,43 +26,116 @@ Total User:
 		// stores statements
 		............
 
-		Stats::title('User count')->key('total-user')->increment();
+		Stats::title('User count')->key('total-user')->increase();
     }
 
     public function deleteUser($id){
 		// delete statements
 		............
 
-		Stats::key('total-user')->decrement();
+		Stats::key('total-user')->decrease();
     }
 
+### Examples 2:
+
 Total Pending Orders:
+
+Increase or count total pending order whenever a new pending order placed, Decrease total pending order 
+whenever an order successfully delivered.
 
     use DaCode\DaStats\Facades\Stats;
     .......
     
-    public function order(Request $request){
+    public function orderStore(Request $request){
 	    // pending order placement statements
-    	............
+        ............
     
-    	Stats::title('Pending order count')->key('total-pending-order')->increment();
+        Stats::title('Pending order count')->key('total-pending-order')->increase();
     }
     
     public function orderDeliver(Request $request){
-		// order delivery statements
-		............
+        // order delivery statements
+        ............
+        
+        Stats::key('total-pending-order')->decrease();
+    }
+### Examples 3:
 
-		Stats::key('total-pending-order')->decrement();
+Product Stocks:
+
+Increase product stock whenever new products purchased, 
+
+    use DaCode\DaStats\Facades\Stats;
+    .......
+
+    public function purchaseStore(Request $request){
+	    // other statements
+    	............
+
+        foreach($purchaseProducts as $product){ // multiple products
+            // purchase products save statements
+            ..............
+            
+            // increase stock for a product
+            Stats::title('Live stock')->key($product->id)->increase($product->quantity);
+        }
     }
 
-Get the statistics
+**Update product stock:** sometime we need to update purchase product quantity, so we have to make sure that our 
+**product stock** also reflect accordingly.
+
+    use DaCode\DaStats\Facades\Stats;
+    .......
+
+    public function purchaseUpdate(Request $request){
+	    // other statement
+    	............
+
+        foreach($purchaseProducts as $product){
+            // purchase products update statements
+            ..............
+            
+            // replace stock value for a product
+            Stats::title('Live stock')->key($product->id)->replace($product->quantity);
+        }
+    }
+
+Decrease product stock whenever a purchase product is delete.
+
+    use DaCode\DaStats\Facades\Stats;
+    .......
+
+    public function productDelete($id){
+	    // other statement
+    	............
+    
+        // find product
+        $purchaseProduct = PurchaseProduct::findOrFail($id);
+
+        // decrese value for this product
+        Stats::title('Live stock')->key($purchaseProduct->id)->decrease($purchaseProduct->quantity);
+
+        $purchaseProduct->delete(); // purchase product delete
+    }
+
+### Get the statistics
+
+Above examples have shown us that how we can create stats by placing increase(), decrease() or replace() inside data **CRUD operations**.
+
+Now let's get or view our stats.
 
     $stats = Stats::key('total-pending-order')->find();
+    
     $stats = Stats::key('total-user')->find();
+
+    $stock = Stats::title('Live stock')->get();
 
 or
 
-    $stats = Stats::statsByKeys('total-pending-order','total-user')->get();
+    $stats = Stats::inKeys('total-pending-order','total-user')->get();
+    
+    // get stock by product ids
+    $stocks = Stats::inKeys(1,22,55,66)->get(); 
 
 ## Installation
 You can install the package via composer:
@@ -78,71 +152,50 @@ You can publish config file (optional)
 
     php artisan vendor:publish --provider="DaCode\DaStats\StatsServiceProvider" --tag="dastats-config"
 
-## Uses
+## Usages
 
-Two type of stats stored in db such as Countable, Summation
+####  Stats increase:
+Increase stats for given key and title.
 
-####  Countable Stats:
-Increment for the specific key and title.
+    Stats::title('Your Title')->key('your-key')->increase(); 
 
-    Stats::title('Your Title')->key('your-key')->increment(); 
+> Increase method increase a stats by **1 (default)**, But you can pass any specific numerical value.
 
-Decrement for the specific key and title.
+> Under the hood **increase()** check is there any stats exits with given key & title, if yes it will increment, if not it will create new record
 
-    Stats::key('your-key')->decrement();
+####  Stats decrease:
+
+Decrease stats value for given key.
+
+    Stats::key('your-key')->decrease();
 
 or
 
-	Stats::title('Your Title')->key('your-key')->decrement();
+	Stats::title('Your Title')->key('your-key')->decrease();
 
-> *Under the hood **increment()** checks is there any stats exits in db associate with this key & title, if yes it will increment 1 with existing value, if not then it will create new record with value 1*.
-> Same goes for **decrement()**, it checks  stats existence, if yes it will decrement 1 from existing value, if not then it will return null. During decrement if the decrement value comes at zero it will delete the stats record from db
+> Decrease method decrease a stats by **1 (default)**, But you can decrease by any specific value.
 
-####  Summation Stats:
-Add value to specific key and title
+> Under the hood **decrease()** checks stats existence, if found it will decrement otherwise return null. During decrement if the decrement comes at zero it will delete the stats record from the storage.
 
-    Stats::title('Your Title')->key('your-key')->addition(5000);
+### Stats replace:
 
-Subtraction value from specific key and title
+In some situation we don't need to increase or decrease we just need to update stats value, in that case we can use **replace()** function
 
-    Stats::key('your-key')->subtraction(5000);
+    Stats::title('Your Title')->key('your-key')->replace(8000);
 
-or 
+> Under the hood **replace()** check is there any stats exits with given key & title, if yes it will update the value otherwise return false / null. 
+>> 2nd argument of **replace()** also allow us to create new record if no record found for the given key / title.
 
-    Stats::title('Your Title')->key('your-key')->subtraction(5000);
 
-> Under the hood **addition()** and **subtraction()** does the same thing as
-> **increment()** and **decrement()** does
 
 ###  Search Stats:
-**Get stats by titles**
-
-    Stats::statsByTitles('Title 1','Title 2')->get();
-or
-        
-    Stats::statsByTitles('Title 1','Title 2')->paginate(10);
-
 **Get stats by keys**
 
-    Stats::statsByKeys('key-1','key-2')->get();
+    Stats::inKeys('key-1','key-2')->get();
 
 or
 
-    Stats::statsByKeys('key-1','key-2')->paginate(10);
-**Get stats by type**
-
-    Stats::statsByType(StatsType::COUNTABLE)->get();
-
-or
-
-    Stats::statsByType(StatsType::COUNTABLE)->paginate();
-
-**Get stats which contain the key**
-
-    Stats::contains('key-1')->get();
-or
-
-    Stats::contains('key-1')->paginate();
+    Stats::inKeys('key-1','key-2')->paginate(10);
 
 **Find single stats**
 
@@ -152,18 +205,14 @@ or
 
        Stats::key('key-1')->find();
 
-**All stats**
-
-    Stats::all();
-
 ###  Remove stats:
 
-    $stats = Stats::key('key-1')->find();
-    
-    Stats::remove($stats->id);
+    $stats = Stats::key('key-1')->remove();
+
 or
 
-	Stats::key('key-1')->remove();
+	Stats::inKeys('key-1','key-2','key-3')->remove();
+
 ###  Isolate stats:
 Isolation can be useful for SaaS applications. It also can be useful if any certain stats need to be stored for individual user.
 
@@ -179,30 +228,103 @@ or
 ###  Conditional operation:
 
     Stats::when($some_condition,function($stats){
-        return $stats->title('Title 1')->key('key-1')->addition(8000);
+        return $stats->title('Title 1')->key('key-1')->increase(8000);
     });
 
 or
 
-    Stats::title('Title 1')->key('key-1')->when($some_condition,function($stats){
-        return $stats->subtraction(2500);
-    },function(){
-        return $stats->addition(500);
-    });
-
-or
-
-    Stats::when($some_condition,function($stats){
-        return $stats->statsByType(StatsType::COUNTABLE);
-    },function($stats){
-        return $stats->statsByTitles('Title 1','Title 2');
-    })->get();
+    Stats::title('Title 1')->key('key-1')
+    ->when($some_condition,
+        function($stats){ // when condition true
+            return $stats->decrease(2500);
+        },function(){ // when condition false
+            return $stats->increase(500); 
+        }
+    );
 
 or
 
     Stats::when($has_tenant,function($stats) use ($tenantId){
         return $stats->isolate('Tenant', $tenantId);
     })->all();
+
+### Multiple increase or decrease or replace
+
+For multiple increase or decrease or replace we can use **doMany()**
+    
+    use DaCode\DaStats\Enum\StatsAction;
+    ...........
+
+
+    // data format
+    $data =  [
+        ['key' => 'key-1','value' = 40],
+        ['key' => 'key-2','value' = 25],
+        ['key' => 'key-3','value' = 35],
+    ]
+
+    // action (ex: StatsAction::INCREASE, StatsAction::DECREASE, StatsAction::REPLACE)
+    $action = StatsAction::INCREASE
+
+    Stats::title('Live stock')->doMany($action,$data);
+
+> when required isolation
+
+    // data format
+    $data =  [
+        ['key' => 'key-1','value' = 40],
+        ['key' => 'key-2','value' = 25],
+        ['key' => 'key-3','value' = 35],
+    ]
+
+    Stats::isolate('Organisation',$organisaiton->id)->title('Live stock')->doMany(StatsAction::INCREASE,$data);
+
+> **Note:** Data format should be followed as the example. 2nd argument of doMany() allow us to perform an action such as increase or decrease or replace
+
+So In example 3 we see that increase operation used inside purchase products loop, but now we can use **doMany()** to do multiple increase by passing an array which contain product id and quantity
+
+    Stats::title('Live stock')->doMany(
+        StatsAction::INCREASE,
+        [
+            ['key' => 1,'value' = 500], // key => product id and value => quantity
+            ['key' => 5,'value' = 152],
+            ['key' => 35,'value' = 7569],
+            ['key' => 7,'value' = 900],
+            ['key' => 9,'value' = 25],
+        ]
+    );
+
+### Jobs
+**doMany()** can be slow when array dataset it to big, in that case user response will be delay. To avoid that we can use queue job which will alow us to do thing in the background
+without delaying.
+
+So we can use predefined queue job to **doMany()** operation.
+
+    use DaCode\DaStats\Jobs\StatsJob;
+    use DaCode\DaStats\Enum\StatsAction;
+    ..........
+
+    $data = [ 
+                ['key' => 1,'value' = 500],
+                ['key' => 5,'value' = 152],
+            ];
+
+    dispatch(new StatsJob('Title Here',$data,StatsAction::DECREASE));
+
+> when required isolation
+
+    use DaCode\DaStats\Jobs\StatsJob;
+    use DaCode\DaStats\Enum\StatsAction;
+    ..........
+    
+    $data = [ 
+                ['key' => 1,'value' = 500],
+                ['key' => 5,'value' = 152],
+            ];
+
+    $job = new StatsJob('Title Here',$data,StatsAction::DECREASE);
+
+    dispatch($job->withIsolation('Tenant',1001));
 
 ### DB Table Structure
 ![Stats Table](img/db.png)
@@ -218,18 +340,15 @@ Here are available methods
 |`isolate(string $name,int $id)`|return stats object            |used for stats isolation            |
 |`title(string $title)`    |return stats object            |set stats title            |
 |`key(string $key)`          |return stats object|set stats key
-| `increment()`				| return true or false	| increment value for specific stats
-|`decrement() `         |return true or false |decrement value for specific stats
-| `addition(int $value)` | return mixed or Eloquent Collection | add given value to specific stats
-|`subtraction(int $value)` | return mixed or Eloquent Collection| subtract given value from specific stats
-| `statsByTitles(...$titles)` | return stats object | search stats by multiple titles
-| `statsByKeys(...$key)` | return stats object | search stats by multiple keys
-| `statsByType(string $type)`| return stats object | search stats by type (ex: Countable, Summation)
-| `contains(string $key)` | return stats object | search stats which contains the given key
+| `increase(int value = 1)`				| return bool	| increase by default 1, can be pass specific numerical value
+|`decrease(int value = 1) `         |return bool |decrease by default 1, can be pass any numerical value
+| `repalce(int $value, bool $createNew = false)` | return bool | replace existing stats value, can be create new record if no stats found by setting $createNew to true 
+|`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data, replace multiple data
+| `inKeys(...$key)` | return stats object | search stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate, it used along with `statsByTitles`,`statsByKeys`,`statsByType`,`contains` functions
-|`get()` | return mixed or eloquent collection | get stats, it used along with `statsByTitles`,`statsByKeys`,`statsByType`,`contains` functions
-|`remove($id = null)`| return true or false | remove particular stats, it can be used along with `title`, `key` functions
+|`get()` | return mixed or eloquent collection | get stats
+|`remove()`| return true or false | remove particular stats
 | `when(bool $value,callable $callback,callable $default = null)`| return stats object     | conditionally apply stats operation
 | `join(string $table,string $pk,array $select = [])`| return stats object | if stats key is id of another table then join the table
 ## License

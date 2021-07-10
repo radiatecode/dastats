@@ -15,9 +15,7 @@ interface StatsInterface
 
     public function decrease(int $value): bool;
 
-    public function replace(int $value): bool;
-
-    public function doMany(string $action,array $data): bool;
+    public function replace(int $value, bool $createNew = false): bool;
 
     public function inKeys(...$keys): StatsInterface;
 
@@ -29,5 +27,5 @@ interface StatsInterface
 
     public function get();
 
-    public function remove(int $id = null): bool;
+    public function remove(): bool;
 }

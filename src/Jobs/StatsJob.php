@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use InvalidArgumentException;
 
 class StatsJob implements ShouldQueue
 {
@@ -24,28 +25,32 @@ class StatsJob implements ShouldQueue
 
     public $action = null;
 
+    /**
+     * @param  string  $isolation_name
+     * @param  int  $isolation_id
+     *
+     * @return $this
+     */
+    public function withIsolation(string $isolation_name,int $isolation_id): StatsJob
+    {
+        $this->isolation_name = $isolation_name;
+
+        $this->isolation_id = $isolation_id;
+
+        return $this;
+    }
+
     public function __construct(string $title,array $data,string $action)
     {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+            throw new InvalidArgumentException("Invalid [{$action}] action!");
+        }
+
         $this->title = $title;
 
         $this->data = $data;
 
         $this->action = $action;
-    }
-
-    /**
-     * @param  int  $isolation_id
-     * @param  string  $isolation_name
-     *
-     * @return $this
-     */
-    public function withIsolation(int $isolation_id,string $isolation_name): StatsJob
-    {
-        $this->isolation_id = $isolation_id;
-
-        $this->isolation_name = $isolation_name;
-
-        return $this;
     }
 
     /**

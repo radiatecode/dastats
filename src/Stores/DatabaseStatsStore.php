@@ -4,13 +4,11 @@
 namespace DaCode\DaStats\Stores;
 
 use DaCode\DaStats\Contracts\StatsInterface;
-use DaCode\DaStats\Jobs\StatsJob;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class DatabaseStatsStore implements StatsInterface
@@ -54,7 +52,26 @@ class DatabaseStatsStore implements StatsInterface
     {
         $this->model = $model;
 
-        $this->setModelQuery();
+        $this->query = $this->model->newQuery();
+    }
+
+    /**
+     * Isolate a stats by [ex: Specific Organisation, Tenant, User]
+     *
+     * @param  string  $name
+     * @param  int  $id
+     *
+     * @return $this
+     */
+    public function isolate(string $name, int $id): StatsInterface
+    {
+        $this->isolate = true;
+
+        $this->isolation_id = $id;
+
+        $this->isolation_name = $name;
+
+        return $this;
     }
 
     /**
@@ -94,17 +111,54 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function increase(int $value): bool
     {
-        return $this->upsert($value, __FUNCTION__);
+        $this->metaDataException();
+
+        if ($value <= 0) {
+            throw new InvalidArgumentException('Value should be greater than 0!');
+        }
+
+        $stats = $this->find();
+
+        if (empty($stats)) {
+            $this->create($value);
+
+            return true;
+        }
+
+        $stats->update(['value' => (int) $stats->value + $value]);
+
+        return true;
     }
 
     /**
      * @param  int  $value
+     * @param  bool  $createNew
      *
      * @return bool
      */
-    public function replace(int $value): bool
+    public function replace(int $value, bool $createNew = false): bool
     {
-        return $this->upsert($value, __FUNCTION__);
+        $this->metaDataException();
+
+        if ($value <= 0) {
+            throw new InvalidArgumentException('Value should be greater than 0!');
+        }
+
+        $stats = $this->find();
+
+        if (empty($stats)) {
+            if ($createNew){
+                $this->create($value);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        $stats->update(['value' => $value]);
+
+        return true;
     }
 
 
@@ -143,36 +197,29 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * Do many increase/ decrease / replace at a time
-     *
-     * @param  string  $action
-     * @param  array  $data
      *
      * @return bool
      */
-    public function doMany(string $action, array $data): bool
+    public function remove(): bool
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
-            throw new InvalidArgumentException('Unknown action!');
-        }
+        return $this->query()->delete();
+    }
 
-        $method = strtolower($action);
+    /**
+     * @param  string  $table
+     * @param  string  $pk
+     * @param  array  $select
+     *
+     * @return $this
+     */
+    public function join(string $table, string $pk = 'id', array $select = []): StatsInterface
+    {
+        $this->query = $this->query->join($table, $table.'.'.$pk, '=', 'da_stats.key')
+            ->when(! empty($select), function ($query) use ($select) {
+                return $query->select(array_merge(['da_stats.*'], $select));
+            });
 
-        if (method_exists($this, $method)) {
-            foreach ($data as $item) {
-                if (array_key_exists('key', $item) && array_key_exists('value', $item)) {
-                    $this->key($item['key']);
-
-                    $this->{$method}($item['value']);
-
-                    $this->setModelQuery(); // reset the query so that it doesn't chain with previous query
-                }
-            }
-
-            return true;
-        }
-
-        return false;
+        return $this;
     }
 
     /**
@@ -192,11 +239,15 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * @return mixed|Collection
+     * @return Collection|mixed
      */
     public function find()
     {
-        return $this->query()->first();
+        $stats = $this->query()->first();
+
+        $this->resetModelQuery(); // prevent further chaining
+
+        return $stats;
     }
 
     /**
@@ -204,79 +255,27 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @param  int  $perPage
      *
-     * @return LengthAwarePaginator
+     * @return LengthAwarePaginator|mixed
      */
     public function paginate(int $perPage)
     {
-        return $this->query()->orderByDesc('id')->paginate($perPage);
+        $stats = $this->query()->orderByDesc('id')->paginate($perPage);
+
+        $this->resetModelQuery(); // prevent further chaining
+
+        return $stats;
     }
 
     /**
-     * @return Collection|null
+     * @return Collection|mixed
      */
     public function get()
     {
-        return $this->query()->orderByDesc('id')->get();
-    }
+        $stats = $this->query()->orderByDesc('id')->get();
 
-    /**
-     * @param  string  $table
-     * @param  string  $pk
-     * @param  array  $select
-     *
-     * @return $this
-     */
-    public function join(
-        string $table,
-        string $pk = 'id',
-        array $select = []
-    ): StatsInterface {
-        $this->query = $this->query->join($table, $table.'.'.$pk, '=',
-            'da_stats.key')
-            ->when(! empty($select), function ($query) use ($select) {
-                return $query->select(array_merge(['da_stats.*'], $select));
-            });
+        $this->resetModelQuery(); // prevent further chaining
 
-        return $this;
-    }
-
-    /**
-     * Isolate a stats by [ex: Specific Organisation, Tenant, User]
-     *
-     * @param  string  $name
-     * @param  int  $id
-     *
-     * @return $this
-     */
-    public function isolate(string $name, int $id): StatsInterface
-    {
-        $this->isolate = true;
-
-        $this->isolation_id = $id;
-
-        $this->isolation_name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @param  int|null  $id
-     *
-     * @return bool
-     */
-    public function remove(int $id = null): bool
-    {
-        if ($id) {
-            return $this->model::findOrFail($id)->delete();
-        }
-
-        $stats = $this->find();
-
-        if ( ! $stats->isEmpty()) {
-            return $stats->delete();
-        }
-
-        return false;
+        return $stats;
     }
 
     /**
@@ -310,50 +309,27 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * set model new query
+     * reset query
      */
-    private function setModelQuery()
+    private function resetModelQuery()
     {
         $this->query = $this->model->newQuery();
     }
 
     /**
      * @param  int  $value
-     * @param  string  $action
      *
-     * @return bool
+     * @return mixed
      */
-    private function upsert(int $value, string $action): bool
-    {
-        $this->metaDataException();
-
-        if ($value <= 0) {
-            throw new InvalidArgumentException('Value should be greater than 0!');
-        }
-
-        $stats = $this->find();
-
-        if (empty($stats)) {
-            $this->model->create(
-                [
-                    'isolation_id' => $this->isolate ? $this->isolation_id
-                        : null,
-                    'isolation_name' => $this->isolate ? $this->isolation_name
-                        : null,
-                    'title' => $this->title,
-                    'key' => $this->key,
-                    'value' => $value,
-                ]
-            );
-
-            return true;
-        }
-
-        $stats->update([
-            'value' => $action == 'replace' ? $value
-                : (int) $stats->value + $value,
-        ]);
-
-        return true;
+    private function create(int $value){
+        return $this->model->create(
+            [
+                'isolation_id' => $this->isolate ? $this->isolation_id : null,
+                'isolation_name' => $this->isolate ? $this->isolation_name : null,
+                'title' => $this->title,
+                'key' => $this->key,
+                'value' => $value,
+            ]
+        );
     }
 }

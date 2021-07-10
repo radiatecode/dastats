@@ -18,7 +18,7 @@ class CreateDaStatsTable extends Migration{
             $table->string('isolation_name')->nullable();
             $table->string('title');
             $table->string('key');
-            $table->string('value');
+            $table->integer('value');
             $table->timestamps();
         });
     }

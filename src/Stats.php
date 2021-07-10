@@ -2,7 +2,7 @@
 
 namespace DaCode\DaStats;
 
-use DaCode\DaStats\Jobs\StatsJob;
+use InvalidArgumentException;
 
 class Stats
 {
@@ -71,19 +71,22 @@ class Stats
      *
      * @return bool
      */
-    public function replace(int $value): bool
+    public function decrease(int $value = 1): bool
     {
-        return $this->storage->replace($value);
+        return $this->storage->decrease($value);
     }
 
     /**
      * @param  int  $value
      *
+     * If set to true it will allow to create new record if no record found to replace
+     * @param  bool  $createNew
+     *
      * @return bool
      */
-    public function decrease(int $value = 1): bool
+    public function replace(int $value, bool $createNew = false): bool
     {
-        return $this->storage->decrease($value);
+        return $this->storage->replace($value,$createNew);
     }
 
     /**
@@ -97,7 +100,39 @@ class Stats
      */
     public function doMany(string $action, array $data): bool
     {
-        return $this->storage->doMany($data);
+        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+            throw new InvalidArgumentException("Invalid [{$action}] action!");
+        }
+
+        $method = strtolower($action);
+
+        if (method_exists($this, $method)) {
+            foreach ($data as $item) {
+                if (array_key_exists('key', $item) && array_key_exists('value', $item)) {
+                    $this->key($item['key']);
+
+                    $this->{$method}($item['value']);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  string  $table
+     * @param  string  $pk
+     * @param  array  $select
+     *
+     * @return $this
+     */
+    public function join(string $table,string $pk = 'id',array $select = []): Stats
+    {
+        $this->storage->join($table,$pk,$select);
+
+        return $this;
     }
 
     /**
@@ -136,26 +171,12 @@ class Stats
     }
 
     /**
-     * @param  string  $table
-     * @param  string  $pk
-     * @param  array  $select
-     *
-     * @return $this
-     */
-    public function join(string $table,string $pk = 'id',array $select = []): Stats
-    {
-        $this->storage->join($table,$pk,$select);
-
-        return $this;
-    }
-
-    /**
-     * @param int|null $id
      *
      * @return bool
      */
-    public function remove(int $id = null): bool{
-        return $this->storage->remove($id);
+    public function remove(): bool
+    {
+        return $this->storage->remove();
     }
 
     /**
