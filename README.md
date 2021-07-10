@@ -8,14 +8,14 @@ This package is a lightweight solution to record and view the statistics for the
 # Examples
 Lots of dashboard or reports have statistic widget like total customer, total user, total pending orders, total sales etc.
 For these **statistic widgets** we applied query across tables, rows along with mathematical equation (plus, minus, count etc.) to get the single
-unified numeric value. For small database it's ok to query / calculate but for large database the calculation may hamper the performance or create complexity. So what if
+unified numeric value. For small database the approach is ok but for large database the calculation may hamper the performance or create complexity. So what if
 we could calculate the statistics during the **CRUD operation**.
 
 ![Stats](img/stats-samples.png)
 
 ### Examples 1:
 
-Total User Counting: 
+**Total User Counting:** 
 
 Increase a user whenever a new user is store, Decrease a user whenever user delete.
 
@@ -38,7 +38,7 @@ Increase a user whenever a new user is store, Decrease a user whenever user dele
 
 ### Examples 2:
 
-Total Pending Orders:
+**Total Pending Orders:**
 
 Increase or count total pending order whenever a new pending order placed, Decrease total pending order 
 whenever an order successfully delivered.
@@ -61,7 +61,7 @@ whenever an order successfully delivered.
     }
 ### Examples 3:
 
-Product Stocks:
+**Product Stocks:**
 
 Increase product stock whenever new products purchased, 
 
@@ -159,9 +159,9 @@ Increase stats for given key and title.
 
     Stats::title('Your Title')->key('your-key')->increase(); 
 
-> Increase method increase a stats by **1 (default)**, But you can pass any specific numerical value.
+> Increase by **default 1**, But you can pass any specific numerical value.
 
-> Under the hood **increase()** check is there any stats exits with given key & title, if yes it will increment, if not it will create new record
+> Under the hood **increase()** check is there any stats exits for the given key & title, if yes it will increment, if not it will create new record
 
 ####  Stats decrease:
 
@@ -193,7 +193,7 @@ In some situation we don't need to increase or decrease we just need to update s
 
     Stats::inKeys('key-1','key-2')->get();
 
-or
+**Paginate**
 
     Stats::inKeys('key-1','key-2')->paginate(10);
 
@@ -214,7 +214,7 @@ or
 	Stats::inKeys('key-1','key-2','key-3')->remove();
 
 ###  Isolate stats:
-Isolation can be useful for SaaS applications. It also can be useful if any certain stats need to be stored for individual user.
+Isolation can be useful for SaaS applications, certain stats can be stored for individual user or organisation or tenant.
 
     Stats::isolate('Tenant',101)->title('Total Order')->key('order-count')->increment();
 
@@ -295,7 +295,7 @@ So In example 3 we see that increase operation used inside purchase products loo
     );
 
 ### Jobs
-**doMany()** can be slow when array dataset it to big, in that case user response will be delay. To avoid that we can use queue job which will alow us to do thing in the background
+**doMany()** can be slower when array dataset it to big, it may cause delay in user response. To avoid that we can use queue job which will allow us to do things in the background
 without delaying.
 
 So we can use predefined queue job to **doMany()** operation.
@@ -342,11 +342,11 @@ Here are available methods
 |`key(string $key)`          |return stats object|set stats key
 | `increase(int value = 1)`				| return bool	| increase by default 1, can be pass specific numerical value
 |`decrease(int value = 1) `         |return bool |decrease by default 1, can be pass any numerical value
-| `repalce(int $value, bool $createNew = false)` | return bool | replace existing stats value, can be create new record if no stats found by setting $createNew to true 
+| `replace(int $value, bool $createNew = false)` | return bool | replace existing stats value, can be create new record if no stats found by setting $createNew to true 
 |`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data, replace multiple data
 | `inKeys(...$key)` | return stats object | search stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
-|`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate, it used along with `statsByTitles`,`statsByKeys`,`statsByType`,`contains` functions
+|`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate
 |`get()` | return mixed or eloquent collection | get stats
 |`remove()`| return true or false | remove particular stats
 | `when(bool $value,callable $callback,callable $default = null)`| return stats object     | conditionally apply stats operation
