@@ -383,7 +383,7 @@ If you discover any security related issues, please email [radiate126@gmail.com]
 
 ## Credits
 - [Noor Alam](https://github.com/radiatecode)
-- [All Contributors](https://github.com/radiatecode/contributors)
+- [All Contributors](https://github.com/radiatecode/dastats/contributors)
 
 ## License
 
