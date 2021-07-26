@@ -11,7 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use InvalidArgumentException;
 
-class StatsJob implements ShouldQueue
+class MultiStatsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,21 +26,22 @@ class StatsJob implements ShouldQueue
     public $action = null;
 
     /**
-     * @param  string  $isolation_name
-     * @param  int  $isolation_id
+     * MultiStatsJob constructor.
      *
-     * @return $this
+     * @param  string  $action
+     * @param  string  $title
+     * @param  array  $data
+     *
+     * -----------------------------------------
+     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE,StatsAction::REPLACE]
+     *
+     * $data = [
+     *      ['key'=>1,value=120],
+     *      ['key'=>3,value=1],
+     *      ['key'=>11,value=23]
+     * ];
      */
-    public function withIsolation(string $isolation_name,int $isolation_id): StatsJob
-    {
-        $this->isolation_name = $isolation_name;
-
-        $this->isolation_id = $isolation_id;
-
-        return $this;
-    }
-
-    public function __construct(string $title,array $data,string $action)
+    public function __construct(string $action,string $title,array $data)
     {
         if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
@@ -52,6 +53,22 @@ class StatsJob implements ShouldQueue
 
         $this->action = $action;
     }
+
+    /**
+     * @param  string  $isolation_name
+     * @param  int  $isolation_id
+     *
+     * @return $this
+     */
+    public function withIsolation(string $isolation_name,int $isolation_id): MultiStatsJob
+    {
+        $this->isolation_name = $isolation_name;
+
+        $this->isolation_id = $isolation_id;
+
+        return $this;
+    }
+
 
     /**
      * Queue job handle

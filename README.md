@@ -7,7 +7,7 @@ This package is a lightweight solution to record and view the statistics for the
 
 # Examples
 Lots of dashboard or reports have statistic widget like total customer, total user, total pending orders, total sales etc.
-For these **statistic widgets** we applied query across tables, rows along with mathematical equation (plus, minus, count etc.) to get the single
+For these **statistic widgets** we applied query across tables, rows along with mathematical equation to get the single
 unified numeric value. For small database the approach is ok but for large database the calculation may hamper the performance or create complexity. So what if
 we could calculate the statistics during the **CRUD operation**.
 
@@ -183,12 +183,12 @@ In some situation we don't need to increase or decrease we just need to update s
 
     Stats::title('Your Title')->key('your-key')->replace(8000);
 
-> Under the hood **replace()** check is there any stats exits with given key & title, if yes it will update the value otherwise return false / null. 
+> Under the hood **replace()** check is there any stats exits with given key & title, if yes it will update the value otherwise return false. 
 >> 2nd argument of **replace()** also allow us to create new record if no record found for the given key / title.
 
 
 
-###  Search Stats:
+###  Find Stats:
 **Get stats by keys**
 
     Stats::inKeys('key-1','key-2')->get();
@@ -268,7 +268,7 @@ For multiple increase or decrease or replace we can use **doMany()**
 
     Stats::title('Live stock')->doMany($action,$data);
 
-> when required isolation
+**when required isolation**
 
     // data format
     $data =  [
@@ -279,7 +279,7 @@ For multiple increase or decrease or replace we can use **doMany()**
 
     Stats::isolate('Organisation',$organisaiton->id)->title('Live stock')->doMany(StatsAction::INCREASE,$data);
 
-> **Note:** Data format should be followed as the example. 2nd argument of doMany() allow us to perform an action such as increase or decrease or replace
+> **Note:** Data format should be followed as the example.
 
 So In example 3 we see that increase operation used inside purchase products loop, but now we can use **doMany()** to do multiple increase by passing an array which contain product id and quantity
 
@@ -295,12 +295,27 @@ So In example 3 we see that increase operation used inside purchase products loo
     );
 
 ### Jobs
-**doMany()** can be slower when array dataset it to big, it may cause delay in user response. To avoid that we can use queue job which will allow us to do things in the background
-without delaying.
+Sometimes we need to queue our stats so that it can run in the background without delaying user response, so in that case we can use predefined jobs.
 
-So we can use predefined queue job to **doMany()** operation.
+> **Note:** make sure we have configured [Laravel Queue](https://laravel.com/docs/8.x/queues) and run the queue worker
 
-    use DaCode\DaStats\Jobs\StatsJob;
+**Single stats job:** 
+
+    use DaCode\DaStats\Jobs\SingleStatsJob;
+    use DaCode\DaStats\Enum\StatsAction;
+    ..........
+
+    // dispatch the job to increase a stats
+    dispatch(new SingleStatsJob(StatsAction::INCREASE,'Title','key',value));
+
+    or
+
+    // dispatch the job to decrease a stats
+    dispatch(new SingleStatsJob(StatsAction::DECREASE,'Title','key',value));
+
+**Multiple stats job:**
+
+    use DaCode\DaStats\Jobs\MultiStatsJob;
     use DaCode\DaStats\Enum\StatsAction;
     ..........
 
@@ -309,11 +324,17 @@ So we can use predefined queue job to **doMany()** operation.
                 ['key' => 5,'value' = 152],
             ];
 
-    dispatch(new StatsJob('Title Here',$data,StatsAction::DECREASE));
+    // dispatch the job to decrease multiple stats value
+    dispatch(new MultiStatsJob(StatsAction::DECREASE,'Title',$data));
+
+    or 
+
+    // dispatch the job to replace multiple stats value
+    dispatch(new MultiStatsJob(StatsAction::REPLACE,'Title',$data));
 
 > when required isolation
 
-    use DaCode\DaStats\Jobs\StatsJob;
+    use DaCode\DaStats\Jobs\MultiStatsJob;
     use DaCode\DaStats\Enum\StatsAction;
     ..........
     
@@ -322,9 +343,11 @@ So we can use predefined queue job to **doMany()** operation.
                 ['key' => 5,'value' = 152],
             ];
 
-    $job = new StatsJob('Title Here',$data,StatsAction::DECREASE);
+    $job = new MultiStatsJob(StatsAction::DECREASE,'Title',$data);
 
-    dispatch($job->withIsolation('Tenant',1001));
+    $job->withIsolation('Tenant',1001);
+
+    dispatch($job);
 
 ### DB Table Structure
 ![Stats Table](img/db.png)
@@ -344,13 +367,24 @@ Here are available methods
 |`decrease(int value = 1) `         |return bool |decrease by default 1, can be pass any numerical value
 | `replace(int $value, bool $createNew = false)` | return bool | replace existing stats value, can be create new record if no stats found by setting $createNew to true 
 |`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data, replace multiple data
-| `inKeys(...$key)` | return stats object | search stats by multiple keys
+| `inKeys(...$key)` | return stats object | find stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate
 |`get()` | return mixed or eloquent collection | get stats
 |`remove()`| return true or false | remove particular stats
 | `when(bool $value,callable $callback,callable $default = null)`| return stats object     | conditionally apply stats operation
 | `join(string $table,string $pk,array $select = [])`| return stats object | if stats key is id of another table then join the table
+
+## Contributing
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## Security
+If you discover any security related issues, please email [radiate126@gmail.com](mailto:radiate126@gmail.com) instead of using the issue tracker.
+
+## Credits
+- [Noor Alam](https://github.com/radiatecode)
+- [All Contributors](https://github.com/radiatecode/contributors)
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

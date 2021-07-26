@@ -100,25 +100,21 @@ class Stats
      */
     public function doMany(string $action, array $data): bool
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+        $method = strtolower($action);
+
+        if (! method_exists($this, $method)) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
         }
 
-        $method = strtolower($action);
+        foreach ($data as $item) {
+            if (array_key_exists('key', $item) && array_key_exists('value', $item)) {
+                $this->key($item['key']);
 
-        if (method_exists($this, $method)) {
-            foreach ($data as $item) {
-                if (array_key_exists('key', $item) && array_key_exists('value', $item)) {
-                    $this->key($item['key']);
-
-                    $this->{$method}($item['value']);
-                }
+                $this->{$method}($item['value']);
             }
-
-            return true;
         }
 
-        return false;
+        return true;
     }
 
     /**
