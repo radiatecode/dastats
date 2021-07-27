@@ -102,7 +102,7 @@ Increase product stock whenever new products purchased,
 
 Decrease product stock whenever a purchase product is delete.
 
-    use DaCode\DaStats\Facades\Stats;
+    use RadiateCode\DaStats\Facades\Stats;
     .......
 
     public function productDelete($id){
@@ -140,7 +140,7 @@ or
 ## Installation
 You can install the package via composer:
 
-    composer require dacode/dastats
+    composer require radiatecode/dastats
 
 Migrate the stats table
 
@@ -150,7 +150,7 @@ Migrate the stats table
 
 You can publish config file (optional)
 
-    php artisan vendor:publish --provider="DaCode\DaStats\StatsServiceProvider" --tag="dastats-config"
+    php artisan vendor:publish --provider="RadiateCode\DaStats\StatsServiceProvider" --tag="dastats-config"
 
 ## Usages
 
@@ -252,7 +252,7 @@ or
 
 For multiple increase or decrease or replace we can use **doMany()**
     
-    use DaCode\DaStats\Enum\StatsAction;
+    use RadiateCode\DaStats\Enum\StatsAction;
     ...........
 
 
@@ -301,8 +301,8 @@ Sometimes we need to queue our stats so that it can run in the background withou
 
 **Single stats job:** 
 
-    use DaCode\DaStats\Jobs\SingleStatsJob;
-    use DaCode\DaStats\Enum\StatsAction;
+    use RadiateCode\DaStats\Jobs\SingleStatsJob;
+    use RadiateCode\DaStats\Enum\StatsAction;
     ..........
 
     // dispatch the job to increase a stats
@@ -315,8 +315,8 @@ Sometimes we need to queue our stats so that it can run in the background withou
 
 **Multiple stats job:**
 
-    use DaCode\DaStats\Jobs\MultiStatsJob;
-    use DaCode\DaStats\Enum\StatsAction;
+    use RadiateCode\DaStats\Jobs\MultiStatsJob;
+    use RadiateCode\DaStats\Enum\StatsAction;
     ..........
 
     $data = [ 
@@ -334,8 +334,8 @@ Sometimes we need to queue our stats so that it can run in the background withou
 
 > when required isolation
 
-    use DaCode\DaStats\Jobs\MultiStatsJob;
-    use DaCode\DaStats\Enum\StatsAction;
+    use RadiateCode\DaStats\Jobs\MultiStatsJob;
+    use RadiateCode\DaStats\Enum\StatsAction;
     ..........
     
     $data = [ 
