@@ -23,17 +23,17 @@ Increase a user whenever a new user is store, Decrease a user whenever user dele
     .......
     
     public function storeUser(Request $request){
-		// stores statements
-		............
+        // stores statements
+        ............
 
-		Stats::title('User count')->key('total-user')->increase();
+        Stats::title('User count')->key('total-user')->increase();
     }
 
     public function deleteUser($id){
-		// delete statements
-		............
+        // delete statements
+        ............
 
-		Stats::key('total-user')->decrease();
+        Stats::key('total-user')->decrease();
     }
 
 ### Examples 2:

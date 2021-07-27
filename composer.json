@@ -1,6 +1,6 @@
 {
     "name": "dacode/dastats",
-    "description": "Statistics or matrics generator",
+    "description": "Record statistics or matrics to generate kpi / dashboard widget",
     "license": "MIT",
     "authors": [
         {
