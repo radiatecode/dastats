@@ -1,9 +1,9 @@
 <?php
 
 
-namespace DaCode\DaStats;
+namespace RadiateCode\DaStats;
 
-use DaCode\DaStats\Stores\DatabaseStatsStore;
+use RadiateCode\DaStats\Stores\DatabaseStatsStore;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 

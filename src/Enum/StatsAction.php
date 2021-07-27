@@ -1,7 +1,7 @@
 <?php
 
 
-namespace DaCode\DaStats\Enum;
+namespace RadiateCode\DaStats\Enum;
 
 
 class StatsAction

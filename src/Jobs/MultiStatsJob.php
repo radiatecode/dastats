@@ -1,9 +1,9 @@
 <?php
 
 
-namespace DaCode\DaStats\Jobs;
+namespace RadiateCode\DaStats\Jobs;
 
-use DaCode\DaStats\Facades\Stats;
+use RadiateCode\DaStats\Facades\Stats;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

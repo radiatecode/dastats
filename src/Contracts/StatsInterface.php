@@ -1,7 +1,7 @@
 <?php
 
 
-namespace DaCode\DaStats\Contracts;
+namespace RadiateCode\DaStats\Contracts;
 
 interface StatsInterface
 {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace DaCode\DaStats\Console;
+namespace RadiateCode\DaStats\Console;
 
 
 use Illuminate\Console\Command;

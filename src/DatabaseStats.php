@@ -1,5 +1,5 @@
 <?php
-namespace DaCode\DaStats;
+namespace RadiateCode\DaStats;
 
 use Illuminate\Database\Eloquent\Model;
 

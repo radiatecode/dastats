@@ -19,7 +19,7 @@ we could calculate the statistics during the **CRUD operation**.
 
 Increase a user whenever a new user is store, Decrease a user whenever user delete.
 
-    use DaCode\DaStats\Facades\Stats;
+    use RadiateCode\DaStats\Facades\Stats;
     .......
     
     public function storeUser(Request $request){
@@ -43,7 +43,7 @@ Increase a user whenever a new user is store, Decrease a user whenever user dele
 Increase or count total pending order whenever a new pending order placed, Decrease total pending order 
 whenever an order successfully delivered.
 
-    use DaCode\DaStats\Facades\Stats;
+    use RadiateCode\DaStats\Facades\Stats;
     .......
     
     public function orderStore(Request $request){
@@ -65,7 +65,7 @@ whenever an order successfully delivered.
 
 Increase product stock whenever new products purchased, 
 
-    use DaCode\DaStats\Facades\Stats;
+    use RadiateCode\DaStats\Facades\Stats;
     .......
 
     public function purchaseStore(Request $request){
@@ -84,7 +84,7 @@ Increase product stock whenever new products purchased,
 **Update product stock:** sometime we need to update purchase product quantity, so we have to make sure that our 
 **product stock** also reflect accordingly.
 
-    use DaCode\DaStats\Facades\Stats;
+    use RadiateCode\DaStats\Facades\Stats;
     .......
 
     public function purchaseUpdate(Request $request){

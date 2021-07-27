@@ -1,6 +1,6 @@
 <?php
 
-namespace DaCode\DaStats;
+namespace RadiateCode\DaStats;
 
 use InvalidArgumentException;
 

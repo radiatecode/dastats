@@ -1,11 +1,11 @@
 <?php
 
 
-namespace DaCode\DaStats;
+namespace RadiateCode\DaStats;
 
 
 use Closure;
-use DaCode\DaStats\Console\StatsTableCommand;
+use RadiateCode\DaStats\Console\StatsTableCommand;
 use Illuminate\Support\ServiceProvider;
 
 class StatsServiceProvider extends ServiceProvider

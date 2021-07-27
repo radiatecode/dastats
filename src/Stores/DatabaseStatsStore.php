@@ -1,9 +1,9 @@
 <?php
 
 
-namespace DaCode\DaStats\Stores;
+namespace RadiateCode\DaStats\Stores;
 
-use DaCode\DaStats\Contracts\StatsInterface;
+use RadiateCode\DaStats\Contracts\StatsInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;

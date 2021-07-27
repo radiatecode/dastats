@@ -1,7 +1,7 @@
 <?php
 
-use DaCode\DaStats\Facades\Stats;
-use DaCode\DaStats\tests\TestCase;
+use RadiateCode\DaStats\Facades\Stats;
+use RadiateCode\DaStats\tests\TestCase;
 
 class CountableStatsTest extends TestCase
 {

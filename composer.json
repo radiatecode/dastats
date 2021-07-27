@@ -1,6 +1,6 @@
 {
-    "name": "dacode/dastats",
-    "description": "Record statistics or matrics to generate kpi / dashboard widget",
+    "name": "radiatecode/dastats",
+    "description": "Record statistics or metrics to generate kpi / dashboard widget",
     "homepage": "https://github.com/radiatecode/dastats",
     "license": "MIT",
     "type": "library",
@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "DaCode\\DaStats\\" : "src/"
+            "RadiateCode\\DaStats\\" : "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "DaCode\\DaStats\\tests\\" : "tests/"
+            "RadiateCode\\DaStats\\tests\\" : "tests/"
         }
     },
     "config": {
@@ -34,7 +34,7 @@
     "extra": {
         "laravel": {
             "providers" : [
-                "DaCode\\DaStats\\StatsServiceProvider"
+                "RadiateCode\\DaStats\\StatsServiceProvider"
             ]
         }
     }

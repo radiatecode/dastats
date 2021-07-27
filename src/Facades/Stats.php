@@ -1,18 +1,18 @@
 <?php
 
 
-namespace DaCode\DaStats\Facades;
+namespace RadiateCode\DaStats\Facades;
 
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \DaCode\DaStats\Stats isolate(string $name,int $id)
- * @method static \DaCode\DaStats\Stats title(string $title)
- * @method static \DaCode\DaStats\Stats key(string $key)
- * @method static \DaCode\DaStats\Stats inKeys(...$key)
- * @method static \DaCode\DaStats\Stats join(string $table,string $pk = 'id',array $select = [])
- * @method static \DaCode\DaStats\Stats|mixed when(bool $value, callable $callback, callable $default = null)
+ * @method static \RadiateCode\DaStats\Stats isolate(string $name,int $id)
+ * @method static \RadiateCode\DaStats\Stats title(string $title)
+ * @method static \RadiateCode\DaStats\Stats key(string $key)
+ * @method static \RadiateCode\DaStats\Stats inKeys(...$key)
+ * @method static \RadiateCode\DaStats\Stats join(string $table,string $pk = 'id',array $select = [])
+ * @method static \RadiateCode\DaStats\Stats|mixed when(bool $value, callable $callback, callable $default = null)
  * @method static mixed increase(int $value = 1)
  * @method static mixed decrease(int $value = 1)
  * @method static mixed replace(int $value, bool $createNew = false)
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static mixed remove()
  *
  *
- * @see \DaCode\DaStats\Stats
+ * @see \RadiateCode\DaStats\Stats
  */
 
 class Stats extends Facade

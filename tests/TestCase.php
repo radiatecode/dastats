@@ -1,10 +1,10 @@
 <?php
 
 
-namespace DaCode\DaStats\tests;
+namespace RadiateCode\DaStats\tests;
 
 
-use DaCode\DaStats\StatsServiceProvider;
+use RadiateCode\DaStats\StatsServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
