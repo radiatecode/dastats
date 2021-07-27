@@ -32,6 +32,5 @@
                 "DaCode\\DaStats\\StatsServiceProvider"
             ]
         }
-    },
-    "minimum-stability": "dev"
+    }
 }
