@@ -1,6 +1,6 @@
 <?php
 
-use DaCode\DaStats\DatabaseStats;
+use RadiateCode\DaStats\DatabaseStats;
 
 return [
     'storage' => [
