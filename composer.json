@@ -1,6 +1,6 @@
 {
     "name": "radiatecode/dastats",
-    "description": "Record statistics or metrics to generate kpi / dashboard widget",
+    "description": "Statistics for dashboard or reports",
     "homepage": "https://github.com/radiatecode/dastats",
     "license": "MIT",
     "type": "library",
