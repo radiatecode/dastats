@@ -81,8 +81,8 @@ Increase product stock whenever new products purchased,
         }
     }
 
-**Update product stock:** sometime we need to update purchase product quantity, so we have to make sure that our 
-**product stock** also reflect accordingly.
+**Update product stock:** sometime we need to update purchase product quantity for example quantity add or subtract in the same view, in that case our 
+**product stock** also need to reflect accordingly.
 
     use RadiateCode\DaStats\Facades\Stats;
     .......
@@ -94,9 +94,19 @@ Increase product stock whenever new products purchased,
         foreach($purchaseProducts as $product){
             // purchase products update statements
             ..............
-            
-            // replace stock value for a product
-            Stats::title('Live stock')->key($product->id)->replace($product->quantity);
+            ..............
+
+
+            //live stock
+            $variation = (int) $newQty - $oldQty;
+
+            Stats::when($variation > 0,function ($stats) use ($product,$variation){
+                $stats->title('Live stock')->key($product->id)->increase($variation);
+            });
+
+            Stats::when($variation < 0,function ($stats) use ($product,$variation){
+                $stats->title('Live stock')->key($product->id)->decrease(abs($variation));
+            });
         }
     }
 
