@@ -9,6 +9,4 @@ class StatsAction
     const INCREASE = 'Increase';
 
     const DECREASE = 'Decrease';
-
-    const REPLACE = 'Replace';
 }

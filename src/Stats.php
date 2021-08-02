@@ -77,26 +77,24 @@ class Stats
     }
 
     /**
-     * @param  int  $value
+     * Do many increase or decrease at a time
      *
-     * If set to true it will allow to create new record if no record found to replace
-     * @param  bool  $createNew
-     *
-     * @return bool
-     */
-    public function replace(int $value, bool $createNew = false): bool
-    {
-        return $this->storage->replace($value,$createNew);
-    }
-
-    /**
-     * Do many increase or decrease or replace at a time
-     *
-     * @param  string  $action // StatsAction::INCREASE or StatsAction::DECREASE or StatsAction::REPLACE
+     * @param  string  $action // StatsAction::INCREASE or StatsAction::DECREASE
      *
      * @param  array  $data
      *
      * @return bool
+     *
+     * -----------------------------------------
+     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
+     *
+     * | data format
+     *
+     * $data = [
+     *      ['key'=>1, value=120],
+     *      ['key'=>3, value=1],
+     *      ['key'=>11, value=23]
+     * ];
      */
     public function doMany(string $action, array $data): bool
     {

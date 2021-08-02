@@ -130,43 +130,6 @@ class DatabaseStatsStore implements StatsInterface
         return true;
     }
 
-    /**
-     * replace any existing stats by given value
-     *
-     * [note: 2nd argument allow to create new stats if stats not found by given condition (ex: key, title)]
-     *
-     * @param  int  $value
-     * @param  bool  $createNew
-     *
-     * @return bool
-     */
-    public function replace(int $value, bool $createNew = false): bool
-    {
-        $this->metaDataException();
-
-        if ($value <= 0) {
-            throw new InvalidArgumentException('Value should be greater than 0!');
-        }
-
-        $stats = $this->find();
-
-        // if stats found then update the stats
-        if (! empty($stats)) {
-            $stats->update(['value' => $value]);
-
-            return true;
-        }
-
-        // create new stats if no existing stats found
-        if ($createNew){
-            $this->create($value);
-
-            return true;
-        }
-
-        return false;
-    }
-
 
     /**
      * Subtract stats value

@@ -130,7 +130,7 @@ Decrease product stock whenever a purchase product is delete.
 
 ### Get the statistics
 
-Above examples have shown us that how we can create stats by placing increase(), decrease() or replace() inside data **CRUD operations**.
+Above examples have shown us that how we can create stats by placing increase(), decrease() inside data **CRUD operations**.
 
 Now let's get or view our stats.
 
@@ -186,17 +186,6 @@ or
 > Decrease method decrease a stats by **1 (default)**, But you can decrease by any specific value.
 
 > Under the hood **decrease()** checks stats existence, if found it will decrement otherwise return null. During decrement if the decrement comes at zero it will delete the stats record from the storage.
-
-### Stats replace:
-
-In some situation we don't need to increase or decrease we just need to update stats value, in that case we can use **replace()** function
-
-    Stats::title('Your Title')->key('your-key')->replace(8000);
-
-> Under the hood **replace()** check is there any stats exits with given key & title, if yes it will update the value otherwise return false. 
->> 2nd argument of **replace()** also allow us to create new record if no record found for the given key / title.
-
-
 
 ###  Find Stats:
 **Get stats by keys**
@@ -258,9 +247,9 @@ or
         return $stats->isolate('Tenant', $tenantId);
     })->all();
 
-### Multiple increase or decrease or replace
+### Multiple increase or decrease
 
-For multiple increase or decrease or replace we can use **doMany()**
+For multiple increase or decrease we can use **doMany()**
     
     use RadiateCode\DaStats\Enum\StatsAction;
     ...........
@@ -273,7 +262,7 @@ For multiple increase or decrease or replace we can use **doMany()**
         ['key' => 'key-3','value' = 35],
     ]
 
-    // action (ex: StatsAction::INCREASE, StatsAction::DECREASE, StatsAction::REPLACE)
+    // action (ex: StatsAction::INCREASE, StatsAction::DECREASE)
     $action = StatsAction::INCREASE
 
     Stats::title('Live stock')->doMany($action,$data);
@@ -339,8 +328,8 @@ Sometimes we need to queue our stats so that it can run in the background withou
 
     or 
 
-    // dispatch the job to replace multiple stats value
-    dispatch(new MultiStatsJob(StatsAction::REPLACE,'Title',$data));
+    // dispatch the job to increase multiple stats value
+    dispatch(new MultiStatsJob(StatsAction::INCREASE,'Title',$data));
 
 > when required isolation
 
@@ -375,8 +364,7 @@ Here are available methods
 |`key(string $key)`          |return stats object|set stats key
 | `increase(int value = 1)`				| return bool	| increase by default 1, can be pass specific numerical value
 |`decrease(int value = 1) `         |return bool |decrease by default 1, can be pass any numerical value
-| `replace(int $value, bool $createNew = false)` | return bool | replace existing stats value, can be create new record if no stats found by setting $createNew to true 
-|`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data, replace multiple data
+|`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data
 | `inKeys(...$key)` | return stats object | find stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate

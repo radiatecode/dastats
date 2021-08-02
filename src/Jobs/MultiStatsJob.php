@@ -33,7 +33,7 @@ class MultiStatsJob implements ShouldQueue
      * @param  array  $data
      *
      * -----------------------------------------
-     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE,StatsAction::REPLACE]
+     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
      *
      * $data = [
      *      ['key'=>1,value=120],
@@ -41,9 +41,9 @@ class MultiStatsJob implements ShouldQueue
      *      ['key'=>11,value=23]
      * ];
      */
-    public function __construct(string $action,string $title,array $data)
+    public function __construct(string $action, string $title, array $data)
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
         }
 

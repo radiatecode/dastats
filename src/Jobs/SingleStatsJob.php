@@ -36,12 +36,12 @@ class SingleStatsJob implements ShouldQueue
      * @param  int  $value
      *
      * --------------------------------------
-     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE,StatsAction::REPLACE]
+     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
      *
      */
     public function __construct(string $action,string $title,string $key,int $value)
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
         }
 
