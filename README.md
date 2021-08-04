@@ -18,24 +18,24 @@ we could calculate the statistics during the **CRUD operation**.
 **Total User Counting:** 
 
 Increase a user whenever a new user is store, Decrease a user whenever user delete.
+```php
+use RadiateCode\DaStats\Facades\Stats;
+.......
 
-    use RadiateCode\DaStats\Facades\Stats;
-    .......
-    
-    public function storeUser(Request $request){
-        // stores statements
-        ............
+public function storeUser(Request $request){
+    // stores statements
+    ............
 
-        Stats::title('User count')->key('total-user')->increase();
-    }
+    Stats::title('User count')->key('total-user')->increase();
+}
 
-    public function deleteUser($id){
-        // delete statements
-        ............
+public function deleteUser($id){
+    // delete statements
+    ............
 
-        Stats::key('total-user')->decrease();
-    }
-
+    Stats::key('total-user')->decrease();
+}
+```
 ### Examples 2:
 
 **Total Pending Orders:**
@@ -44,22 +44,22 @@ Increase or count total pending order whenever a new pending order placed, Decre
 whenever an order successfully delivered.
 
 ```php 
-    use RadiateCode\DaStats\Facades\Stats;
-    .......
+use RadiateCode\DaStats\Facades\Stats;
+.......
+
+public function orderStore(Request $request){
+    // pending order placement statements
+    ............
+
+    Stats::title('Pending order count')->key('total-pending-order')->increase();
+}
+
+public function orderDeliver(Request $request){
+    // order delivery statements
+    ............
     
-    public function orderStore(Request $request){
-	    // pending order placement statements
-        ............
-    
-        Stats::title('Pending order count')->key('total-pending-order')->increase();
-    }
-    
-    public function orderDeliver(Request $request){
-        // order delivery statements
-        ............
-        
-        Stats::key('total-pending-order')->decrease();
-    } 
+    Stats::key('total-pending-order')->decrease();
+} 
 ```
     
 ### Examples 3:
@@ -69,68 +69,68 @@ whenever an order successfully delivered.
 Increase product stock whenever new products purchased, 
 
 ```php 
-    use RadiateCode\DaStats\Facades\Stats;
-    .......
+use RadiateCode\DaStats\Facades\Stats;
+.......
 
-    public function purchaseStore(Request $request){
-	    // other statements
-    	............
+public function purchaseStore(Request $request){
+    // other statements
+    ............
 
-        foreach($purchaseProducts as $product){ // multiple products
-            // purchase products save statements
-            ..............
-            
-            // increase stock for a product
-            Stats::title('Live stock')->key($product->id)->increase($product->quantity);
-        }
+    foreach($purchaseProducts as $product){ // multiple products
+        // purchase products save statements
+        ..............
+        
+        // increase stock for a product
+        Stats::title('Live stock')->key($product->id)->increase($product->quantity);
     }
+}
 ```
 **Update product stock:** sometime we need to update purchase product quantity for example quantity add or subtract in the same view, in that case our 
 **product stock** also need to reflect accordingly.
 ```php 
-    use RadiateCode\DaStats\Facades\Stats;
-    .......
+use RadiateCode\DaStats\Facades\Stats;
+.......
 
-    public function purchaseUpdate(Request $request){
-	    // other statement
-    	............
+public function purchaseUpdate(Request $request){
+    // other statement
+    ............
 
-        foreach($purchaseProducts as $product){
-            // purchase products update statements
-            ..............
-            ..............
+    foreach($purchaseProducts as $product){
+        // purchase products update statements
+        ..............
+        ..............
 
 
-            //live stock
-            $variation = (int) $newQty - $oldQty;
+        //live stock
+        $variation = (int) $newQty - $oldQty;
 
-            Stats::when($variation > 0,function ($stats) use ($product,$variation){
-                $stats->title('Live stock')->key($product->id)->increase($variation);
-            });
+        Stats::when($variation > 0,function ($stats) use ($product,$variation){
+            $stats->title('Live stock')->key($product->id)->increase($variation);
+        });
 
-            Stats::when($variation < 0,function ($stats) use ($product,$variation){
-                $stats->title('Live stock')->key($product->id)->decrease(abs($variation));
-            });
-        }
+        Stats::when($variation < 0,function ($stats) use ($product,$variation){
+            $stats->title('Live stock')->key($product->id)->decrease(abs($variation));
+        });
     }
+}
 ```
 Decrease product stock whenever a purchase product is delete.
 ```php 
-    use RadiateCode\DaStats\Facades\Stats;
-    .......
+use RadiateCode\DaStats\Facades\Stats;
+.......
 
-    public function productDelete($id){
-	    // other statement
-    	............
-    
-        // find product
-        $purchaseProduct = PurchaseProduct::findOrFail($id);
+public function productDelete($id){
+    // other statement
+    ............
 
-        // decrese value for this product
-        Stats::title('Live stock')->key($purchaseProduct->id)->decrease($purchaseProduct->quantity);
+    // find product
+    $purchaseProduct = PurchaseProduct::findOrFail($id);
 
-        $purchaseProduct->delete(); // purchase product delete
-    }
+    // decrese value for this product
+    Stats::title('Live stock')->key($purchaseProduct->id)->decrease($purchaseProduct->quantity);
+
+    $purchaseProduct->delete(); // purchase product delete
+}
 ```
 ### Get the statistics
 
@@ -138,18 +138,18 @@ Above examples have shown us that how we can create stats by placing increase(),
 
 Now let's get or view our stats.
 ```php 
-    $stats = Stats::key('total-pending-order')->find();
-    
-    $stats = Stats::key('total-user')->find();
+$stats = Stats::key('total-pending-order')->find();
 
-    $stock = Stats::title('Live stock')->get();
+$stats = Stats::key('total-user')->find();
+
+$stock = Stats::title('Live stock')->get();
 ```
 or
 ```php 
-    $stats = Stats::inKeys('total-pending-order','total-user')->get();
-    
-    // get stock by product ids
-    $stocks = Stats::inKeys(1,22,55,66)->get(); 
+$stats = Stats::inKeys('total-pending-order','total-user')->get();
+
+// get stock by product ids
+$stocks = Stats::inKeys(1,22,55,66)->get(); 
 ```
 ## Installation
 You can install the package via composer:
