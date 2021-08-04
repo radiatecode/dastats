@@ -43,6 +43,7 @@ Increase a user whenever a new user is store, Decrease a user whenever user dele
 Increase or count total pending order whenever a new pending order placed, Decrease total pending order 
 whenever an order successfully delivered.
 
+```php 
     use RadiateCode\DaStats\Facades\Stats;
     .......
     
@@ -58,13 +59,16 @@ whenever an order successfully delivered.
         ............
         
         Stats::key('total-pending-order')->decrease();
-    }
+    } 
+```
+    
 ### Examples 3:
 
 **Product Stocks:**
 
 Increase product stock whenever new products purchased, 
 
+```php 
     use RadiateCode\DaStats\Facades\Stats;
     .......
 
@@ -80,10 +84,10 @@ Increase product stock whenever new products purchased,
             Stats::title('Live stock')->key($product->id)->increase($product->quantity);
         }
     }
-
+```
 **Update product stock:** sometime we need to update purchase product quantity for example quantity add or subtract in the same view, in that case our 
 **product stock** also need to reflect accordingly.
-
+```php 
     use RadiateCode\DaStats\Facades\Stats;
     .......
 
@@ -109,9 +113,9 @@ Increase product stock whenever new products purchased,
             });
         }
     }
-
+```
 Decrease product stock whenever a purchase product is delete.
-
+```php 
     use RadiateCode\DaStats\Facades\Stats;
     .......
 
@@ -127,26 +131,26 @@ Decrease product stock whenever a purchase product is delete.
 
         $purchaseProduct->delete(); // purchase product delete
     }
-
+```
 ### Get the statistics
 
 Above examples have shown us that how we can create stats by placing increase(), decrease() inside data **CRUD operations**.
 
 Now let's get or view our stats.
-
+```php 
     $stats = Stats::key('total-pending-order')->find();
     
     $stats = Stats::key('total-user')->find();
 
     $stock = Stats::title('Live stock')->get();
-
+```
 or
-
+```php 
     $stats = Stats::inKeys('total-pending-order','total-user')->get();
     
     // get stock by product ids
     $stocks = Stats::inKeys(1,22,55,66)->get(); 
-
+```
 ## Installation
 You can install the package via composer:
 
@@ -166,9 +170,9 @@ You can publish config file (optional)
 
 ####  Stats increase:
 Increase stats for given key and title.
-
-    Stats::title('Your Title')->key('your-key')->increase(); 
-
+```php 
+Stats::title('Your Title')->key('your-key')->increase(); 
+```
 > Increase by **default 1**, But you can pass any specific numerical value.
 
 > Under the hood **increase()** check is there any stats exits for the given key & title, if yes it will increment, if not it will create new record
@@ -176,178 +180,184 @@ Increase stats for given key and title.
 ####  Stats decrease:
 
 Decrease stats value for given key.
-
-    Stats::key('your-key')->decrease();
-
+```php 
+Stats::key('your-key')->decrease();
+```
 or
-
-	Stats::title('Your Title')->key('your-key')->decrease();
-
+```php 
+Stats::title('Your Title')->key('your-key')->decrease();
+```
 > Decrease method decrease a stats by **1 (default)**, But you can decrease by any specific value.
 
 > Under the hood **decrease()** checks stats existence, if found it will decrement otherwise return null. During decrement if the decrement comes at zero it will delete the stats record from the storage.
 
 ###  Find Stats:
 **Get stats by keys**
-
-    Stats::inKeys('key-1','key-2')->get();
-
+```php 
+Stats::inKeys('key-1','key-2')->get();
+```
 **Paginate**
-
-    Stats::inKeys('key-1','key-2')->paginate(10);
-
+```php 
+Stats::inKeys('key-1','key-2')->paginate(10);
+```
 **Find single stats**
-
-    Stats::title('Title 1')->key('key-1')->find();
+```php 
+Stats::title('Title 1')->key('key-1')->find();
+```    
 or
-
-
-       Stats::key('key-1')->find();
+```php 
+Stats::key('key-1')->find();
+```
 
 ###  Remove stats:
-
-    $stats = Stats::key('key-1')->remove();
-
+```php 
+$stats = Stats::key('key-1')->remove();
+```
 or
 
-	Stats::inKeys('key-1','key-2','key-3')->remove();
+```php 
+Stats::inKeys('key-1','key-2','key-3')->remove();
+```
 
 ###  Isolate stats:
 Isolation can be useful for SaaS applications, certain stats can be stored for individual user or organisation or tenant.
+```php 
+Stats::isolate('Tenant',101)->title('Total Order')->key('order-count')->increment();
 
-    Stats::isolate('Tenant',101)->title('Total Order')->key('order-count')->increment();
-
-    Stats::isolate('Tenant',101)->key('order-count')->find();
+Stats::isolate('Tenant',101)->key('order-count')->find();
+```
 or
+```php 
+Stats::isolate('User',202)->title('Complete Project')->key('project-completion')->increment();
 
-    Stats::isolate('User',202)->title('Complete Project')->key('project-completion')->increment();
-    
-    Stats::isolate('User',202)->key('project-completion')->find();
+Stats::isolate('User',202)->key('project-completion')->find();
+```    
 
 ###  Conditional operation:
-
-    Stats::when($some_condition,function($stats){
-        return $stats->title('Title 1')->key('key-1')->increase(8000);
-    });
-
+```php 
+Stats::when($some_condition,function($stats){
+    return $stats->title('Title 1')->key('key-1')->increase(8000);
+});
+```
 or
-
-    Stats::title('Title 1')->key('key-1')
-    ->when($some_condition,
-        function($stats){ // when condition true
-            return $stats->decrease(2500);
-        },function(){ // when condition false
-            return $stats->increase(500); 
-        }
-    );
-
+```php 
+Stats::title('Title 1')->key('key-1')
+->when($some_condition,
+    function($stats){ // when condition true
+        return $stats->decrease(2500);
+    },function(){ // when condition false
+        return $stats->increase(500); 
+    }
+);
+```
 or
-
-    Stats::when($has_tenant,function($stats) use ($tenantId){
-        return $stats->isolate('Tenant', $tenantId);
-    })->all();
-
+```php 
+Stats::when($has_tenant,function($stats) use ($tenantId){
+    return $stats->isolate('Tenant', $tenantId);
+})->all();
+```
 ### Multiple increase or decrease
 
 For multiple increase or decrease we can use **doMany()**
-    
-    use RadiateCode\DaStats\Enum\StatsAction;
-    ...........
+```php   
+use RadiateCode\DaStats\Enum\StatsAction;
+...........
 
 
-    // data format
-    $data =  [
-        ['key' => 'key-1','value' = 40],
-        ['key' => 'key-2','value' = 25],
-        ['key' => 'key-3','value' = 35],
-    ]
+// data format
+$data =  [
+    ['key' => 'key-1','value' = 40],
+    ['key' => 'key-2','value' = 25],
+    ['key' => 'key-3','value' = 35],
+]
 
-    // action (ex: StatsAction::INCREASE, StatsAction::DECREASE)
-    $action = StatsAction::INCREASE
+// action (ex: StatsAction::INCREASE, StatsAction::DECREASE)
+$action = StatsAction::INCREASE
 
-    Stats::title('Live stock')->doMany($action,$data);
-
+Stats::title('Live stock')->doMany($action,$data);
+```
 **when required isolation**
+```php 
+// data format
+$data =  [
+    ['key' => 'key-1','value' = 40],
+    ['key' => 'key-2','value' = 25],
+    ['key' => 'key-3','value' = 35],
+]
 
-    // data format
-    $data =  [
-        ['key' => 'key-1','value' = 40],
-        ['key' => 'key-2','value' = 25],
-        ['key' => 'key-3','value' = 35],
-    ]
-
-    Stats::isolate('Organisation',$organisaiton->id)->title('Live stock')->doMany(StatsAction::INCREASE,$data);
-
+Stats::isolate('Organisation',$organisaiton->id)->title('Live stock')->doMany(StatsAction::INCREASE,$data);
+```
 > **Note:** Data format should be followed as the example.
 
 So In example 3 we see that increase operation used inside purchase products loop, but now we can use **doMany()** to do multiple increase by passing an array which contain product id and quantity
-
-    Stats::title('Live stock')->doMany(
-        StatsAction::INCREASE,
-        [
-            ['key' => 1,'value' = 500], // key => product id and value => quantity
-            ['key' => 5,'value' = 152],
-            ['key' => 35,'value' = 7569],
-            ['key' => 7,'value' = 900],
-            ['key' => 9,'value' = 25],
-        ]
-    );
-
+```php 
+Stats::title('Live stock')->doMany(
+    StatsAction::INCREASE,
+    [
+        ['key' => 1,'value' = 500], // key => product id and value => quantity
+        ['key' => 5,'value' = 152],
+        ['key' => 35,'value' = 7569],
+        ['key' => 7,'value' = 900],
+        ['key' => 9,'value' = 25],
+    ]
+);
+```
 ### Jobs
 Sometimes we need to queue our stats so that it can run in the background without delaying user response, so in that case we can use predefined jobs.
 
 > **Note:** make sure we have configured [Laravel Queue](https://laravel.com/docs/8.x/queues) and run the queue worker
 
 **Single stats job:** 
+```php 
+use RadiateCode\DaStats\Jobs\SingleStatsJob;
+use RadiateCode\DaStats\Enum\StatsAction;
+..........
 
-    use RadiateCode\DaStats\Jobs\SingleStatsJob;
-    use RadiateCode\DaStats\Enum\StatsAction;
-    ..........
+// dispatch the job to increase a stats
+dispatch(new SingleStatsJob(StatsAction::INCREASE,'Title','key',value));
 
-    // dispatch the job to increase a stats
-    dispatch(new SingleStatsJob(StatsAction::INCREASE,'Title','key',value));
+or
 
-    or
-
-    // dispatch the job to decrease a stats
-    dispatch(new SingleStatsJob(StatsAction::DECREASE,'Title','key',value));
-
+// dispatch the job to decrease a stats
+dispatch(new SingleStatsJob(StatsAction::DECREASE,'Title','key',value));
+```
 **Multiple stats job:**
+```php 
+use RadiateCode\DaStats\Jobs\MultiStatsJob;
+use RadiateCode\DaStats\Enum\StatsAction;
+..........
 
-    use RadiateCode\DaStats\Jobs\MultiStatsJob;
-    use RadiateCode\DaStats\Enum\StatsAction;
-    ..........
+$data = [ 
+            ['key' => 1,'value' = 500],
+            ['key' => 5,'value' = 152],
+        ];
 
-    $data = [ 
-                ['key' => 1,'value' = 500],
-                ['key' => 5,'value' = 152],
-            ];
+// dispatch the job to decrease multiple stats value
+dispatch(new MultiStatsJob(StatsAction::DECREASE,'Title',$data));
+```
+or 
 
-    // dispatch the job to decrease multiple stats value
-    dispatch(new MultiStatsJob(StatsAction::DECREASE,'Title',$data));
-
-    or 
-
-    // dispatch the job to increase multiple stats value
-    dispatch(new MultiStatsJob(StatsAction::INCREASE,'Title',$data));
-
+```php 
+// dispatch the job to increase multiple stats value
+dispatch(new MultiStatsJob(StatsAction::INCREASE,'Title',$data));
+```
 > when required isolation
+```php 
+use RadiateCode\DaStats\Jobs\MultiStatsJob;
+use RadiateCode\DaStats\Enum\StatsAction;
+..........
 
-    use RadiateCode\DaStats\Jobs\MultiStatsJob;
-    use RadiateCode\DaStats\Enum\StatsAction;
-    ..........
-    
-    $data = [ 
-                ['key' => 1,'value' = 500],
-                ['key' => 5,'value' = 152],
-            ];
+$data = [ 
+            ['key' => 1,'value' = 500],
+            ['key' => 5,'value' = 152],
+        ];
 
-    $job = new MultiStatsJob(StatsAction::DECREASE,'Title',$data);
+$job = new MultiStatsJob(StatsAction::DECREASE,'Title',$data);
 
-    $job->withIsolation('Tenant',1001);
+$job->withIsolation('Tenant',1001);
 
-    dispatch($job);
-
+dispatch($job);
+```
 ### DB Table Structure
 ![Stats Table](img/db.png)
 
