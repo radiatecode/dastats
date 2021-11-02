@@ -43,7 +43,7 @@ class MultiStatsJob implements ShouldQueue
      */
     public function __construct(string $action, string $title, array $data)
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease'])) {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
         }
 

@@ -151,6 +151,10 @@ $stats = Stats::inKeys('total-pending-order','total-user')->get();
 // get stock by product ids
 $stocks = Stats::inKeys(1,22,55,66)->get(); 
 ```
+or
+```php 
+$stats = Stats::contains('pending')->get();
+```
 ## Installation
 You can install the package via composer:
 
@@ -190,7 +194,15 @@ Stats::title('Your Title')->key('your-key')->decrease();
 > Decrease method decrease a stats by **1 (default)**, But you can decrease by any specific value.
 
 > Under the hood **decrease()** checks stats existence, if found it will decrement otherwise return null. During decrement if the decrement comes at zero it will delete the stats record from the storage.
-
+####  Stats replace:
+In some cases we need to replace our existing stats value in those cases replace() can be used
+```php 
+Stats::key('your-key')->replace($value);
+```
+or
+```php 
+Stats::title('Your Title')->key('your-key')->replace($value);
+```
 ###  Find Stats:
 **Get stats by keys**
 ```php 
@@ -208,7 +220,15 @@ or
 ```php 
 Stats::key('key-1')->find();
 ```
+**Get stats by contains a part of key**
+```php 
+Stats::contain('partOfkey')->get();
 
+example:
+// key name is `total-registered-user`
+// we can get stats by the key part `registered`
+Stats::contain('registered')->get();
+```
 ###  Remove stats:
 ```php 
 $stats = Stats::key('key-1')->remove();
@@ -256,7 +276,7 @@ Stats::when($has_tenant,function($stats) use ($tenantId){
     return $stats->isolate('Tenant', $tenantId);
 })->all();
 ```
-### Multiple increase or decrease
+### Multiple increase or decrease or replace
 
 For multiple increase or decrease we can use **doMany()**
 ```php   
@@ -271,7 +291,7 @@ $data =  [
     ['key' => 'key-3','value' = 35],
 ]
 
-// action (ex: StatsAction::INCREASE, StatsAction::DECREASE)
+// action (ex: StatsAction::INCREASE, StatsAction::DECREASE, StatsAction::REPLACE)
 $action = StatsAction::INCREASE
 
 Stats::title('Live stock')->doMany($action,$data);
@@ -314,12 +334,15 @@ use RadiateCode\DaStats\Enum\StatsAction;
 ..........
 
 // dispatch the job to increase a stats
-dispatch(new SingleStatsJob(StatsAction::INCREASE,'Title','key',value));
+dispatch(new SingleStatsJob(StatsAction::INCREASE,'Title','key',$value));
 
 or
 
 // dispatch the job to decrease a stats
-dispatch(new SingleStatsJob(StatsAction::DECREASE,'Title','key',value));
+dispatch(new SingleStatsJob(StatsAction::DECREASE,'Title','key',$value));
+
+// dispatch the job to replace a stats
+dispatch(new SingleStatsJob(StatsAction::REPLACE,'Title','key',$value));
 ```
 **Multiple stats job:**
 ```php 
@@ -372,9 +395,11 @@ Here are available methods
 |`isolate(string $name,int $id)`|return stats object            |used for stats isolation            |
 |`title(string $title)`    |return stats object            |set stats title            |
 |`key(string $key)`          |return stats object|set stats key
+|`contain(string $key)`          |return stats object|set part of key
 | `increase(int value = 1)`				| return bool	| increase by default 1, can be pass specific numerical value
 |`decrease(int value = 1) `         |return bool |decrease by default 1, can be pass any numerical value
-|`doMany(string $action, array $data)` | return bool| increase multiple data, decrease multiple data
+|`replace(int value) `         |return bool | replace existing stats value
+|`doMany(string $action, array $data)` | return bool| increase, decrease or replace multiple data
 | `inKeys(...$key)` | return stats object | find stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate

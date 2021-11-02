@@ -15,9 +15,13 @@ interface StatsInterface
 
     public function decrease(int $value): bool;
 
+    public function replace(int $value): bool;
+
     public function inKeys(...$keys): StatsInterface;
 
     public function join(string $table,string $pk = 'id',array $select = []): StatsInterface;
+
+    public function contain(string $key): StatsInterface;
 
     public function find();
 

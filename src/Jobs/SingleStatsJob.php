@@ -39,9 +39,9 @@ class SingleStatsJob implements ShouldQueue
      * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
      *
      */
-    public function __construct(string $action,string $title,string $key,int $value)
+    public function __construct(string $action,string $title,string $key,int $value = 1)
     {
-        if ( ! in_array(strtolower($action), ['increase', 'decrease'])) {
+        if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");
         }
 

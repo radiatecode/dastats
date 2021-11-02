@@ -114,7 +114,7 @@ class DatabaseStatsStore implements StatsInterface
         $this->metaDataException();
 
         if ($value <= 0) {
-            throw new InvalidArgumentException('Value should be greater than 0!');
+            throw new InvalidArgumentException('Value should be greater than or equal to 0!');
         }
 
         $stats = $this->find();
@@ -165,6 +165,26 @@ class DatabaseStatsStore implements StatsInterface
         return true;
     }
 
+    public function replace(int $value): bool
+    {
+        $this->metaDataException();
+
+        if ($value <= 0) {
+            throw new InvalidArgumentException('Value should be greater than or equal to 0!');
+        }
+
+        $stats = $this->find();
+
+        if (empty($stats)) {
+            return false;
+        }
+
+        $stats->update(['value' => $value]);
+
+        return true;
+    }
+
+
     /**
      *
      * @return bool
@@ -206,6 +226,14 @@ class DatabaseStatsStore implements StatsInterface
 
         return $this;
     }
+
+    public function contain(string $key): StatsInterface
+    {
+        $this->query = $this->query->where('key', 'like', '%'.$key.'%');
+
+        return $this;
+    }
+
 
     /**
      * @return Collection|mixed
@@ -290,11 +318,13 @@ class DatabaseStatsStore implements StatsInterface
      *
      * @return mixed
      */
-    private function create(int $value){
+    private function create(int $value)
+    {
         return $this->model->create(
             [
                 'isolation_id' => $this->isolate ? $this->isolation_id : null,
-                'isolation_name' => $this->isolate ? $this->isolation_name : null,
+                'isolation_name' => $this->isolate ? $this->isolation_name
+                    : null,
                 'title' => $this->title,
                 'key' => $this->key,
                 'value' => $value,

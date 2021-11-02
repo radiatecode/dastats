@@ -77,6 +77,16 @@ class Stats
     }
 
     /**
+     * @param  int  $value
+     *
+     * @return bool
+     */
+    public function replace(int $value): bool
+    {
+        return $this->storage->replace($value);
+    }
+
+    /**
      * Do many increase or decrease at a time
      *
      * @param  string  $action // StatsAction::INCREASE or StatsAction::DECREASE
@@ -86,7 +96,7 @@ class Stats
      * @return bool
      *
      * -----------------------------------------
-     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
+     * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE,StatsAction::REPLACE]
      *
      * | data format
      *
@@ -135,6 +145,20 @@ class Stats
     public function inKeys(...$key): Stats
     {
         $this->storage->inKeys($key);
+
+        return $this;
+    }
+
+    /**
+     * find stats which contains given key
+     *
+     * [nt: $key could be a part of key]
+     *
+     * @return $this
+     */
+    public function contain(string $key): Stats
+    {
+        $this->storage->contain($key);
 
         return $this;
     }
