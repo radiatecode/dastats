@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \RadiateCode\DaStats\Stats contain(string $key)
  * @method static \RadiateCode\DaStats\Stats join(string $table,string $pk = 'id',array $select = [])
  * @method static \RadiateCode\DaStats\Stats|mixed when(bool $value, callable $callback, callable $default = null)
+ * @method static mixed exists(callable $existsCallback = null,callable $notExistsCallback = null)
  * @method static mixed increase(int $value = 1)
  * @method static mixed decrease(int $value = 1)
  * @method static mixed replace(int $value)

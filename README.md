@@ -220,6 +220,23 @@ or
 ```php 
 Stats::key('key-1')->find();
 ```
+**Check stats existence**
+```php 
+Stats::title('Title 1')->key('key-1')->exists(); // return true/false
+```
+or
+```php 
+// based on existence do stats operation
+
+Stats::title('Title')->key('key-1')->exists(
+    function ($stats){ // if exists
+        $stats->replace(300);
+    },function ($stats){ // if not exists
+        $stats->increase(25);
+    }
+);
+```   
+
 **Get stats by contains a part of key**
 ```php 
 Stats::contain('partOfkey')->get();
@@ -404,6 +421,7 @@ Here are available methods
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate
 |`get()` | return mixed or eloquent collection | get stats
+| `exists(callable $existsCallback = null,callable $notExistsCallback = null)`| return true/false if args empty     | we can apply stats operation based on exist condition by passing args, 1st arg works when stats exists, 2nd arg works when stats not exists. If no args pass then it simply return true/false.
 |`remove()`| return true or false | remove particular stats
 | `when(bool $value,callable $callback,callable $default = null)`| return stats object     | conditionally apply stats operation
 | `join(string $table,string $pk,array $select = [])`| return stats object | if stats key is id of another table then join the table

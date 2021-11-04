@@ -48,6 +48,8 @@ class DatabaseStatsStore implements StatsInterface
      */
     private $query = null;
 
+    private $oldStats = null;
+
     public function __construct(Model $model)
     {
         $this->model = $model;
@@ -240,7 +242,13 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function find()
     {
-        $stats = $this->query()->first();
+        if ($this->oldStats){
+            $stats = $this->oldStats;
+        }else{
+            $stats = $this->query()->first();
+
+            $this->oldStats = $stats;
+        }
 
         $this->resetModelQuery(); // prevent further chaining
 

@@ -218,6 +218,26 @@ class Stats
     }
 
     /**
+     * Check stats exists or not
+     *
+     * @param  callable|null  $existsCallback // if exists then do this
+     * @param  callable|null  $notExistsCallback // if not exists then do this
+     *
+     * @return bool|Stats
+     */
+    public function exists(callable $existsCallback = null, callable $notExistsCallback = null){
+        $stats = $this->storage->find();
+
+        if ($existsCallback && $stats){
+            return $existsCallback($this);
+        }elseif ($existsCallback && $notExistsCallback && !$stats) {
+            return $notExistsCallback($this);
+        }
+
+        return ! empty($stats);
+    }
+
+    /**
      * Resolve storage
      */
     private function resolve()
