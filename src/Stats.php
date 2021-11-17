@@ -126,15 +126,34 @@ class Stats
     }
 
     /**
+     * join the table with the stats table
+     *
      * @param  string  $table
      * @param  string  $pk
-     * @param  array  $select
      *
      * @return $this
      */
-    public function join(string $table,string $pk = 'id',array $select = []): Stats
+    public function joinWith(string $table,string $pk = 'id'): Stats
     {
-        $this->storage->join($table,$pk,$select);
+        $this->storage->joinWith($table,$pk);
+
+        return $this;
+    }
+
+    /**
+     * join more than one tables
+     *
+     *
+     * @param $table
+     * @param $first
+     * @param  null  $operator
+     * @param  null  $second
+     *
+     * @return $this
+     */
+    public function join($table, $first, $operator = null, $second = null): Stats
+    {
+        $this->storage->joinWith($table, $first, $operator, $second);
 
         return $this;
     }
@@ -181,11 +200,13 @@ class Stats
     }
 
     /**
+     * @param  array  $columns
+     *
      * @return mixed
      */
-    public function get()
+    public function get(array $columns = [])
     {
-        return $this->storage->get();
+        return $this->storage->get($columns);
     }
 
     /**

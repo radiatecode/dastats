@@ -3,6 +3,7 @@
 
 namespace RadiateCode\DaStats\Stores;
 
+use Exception;
 use RadiateCode\DaStats\Contracts\StatsInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -197,18 +198,23 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
+     *
      * @param  string  $table
      * @param  string  $pk
-     * @param  array  $select
      *
      * @return $this
+     * @throws Exception
      */
-    public function join(string $table, string $pk = 'id', array $select = []): StatsInterface
+    public function joinWith(string $table, string $pk = 'id'): StatsInterface
     {
-        $this->query = $this->query->join($table, $table.'.'.$pk, '=', 'da_stats.key')
-            ->when(! empty($select), function ($query) use ($select) {
-                return $query->select(array_merge(['da_stats.*'], $select));
-            });
+        $this->query = $this->query->join($table, $table.'.'.$pk, '=', 'da_stats.key');
+
+        return $this;
+    }
+
+    public function join($table, $first, $operator, $second): StatsInterface
+    {
+        $this->query = $this->query->join($table, $first, $operator, $second);
 
         return $this;
     }
@@ -242,9 +248,9 @@ class DatabaseStatsStore implements StatsInterface
      */
     public function find()
     {
-        if ($this->oldStats){
+        if ($this->oldStats) {
             $stats = $this->oldStats;
-        }else{
+        } else {
             $stats = $this->query()->first();
 
             $this->oldStats = $stats;
@@ -274,14 +280,30 @@ class DatabaseStatsStore implements StatsInterface
     /**
      * @return Collection|mixed
      */
-    public function get()
+    public function get(array $columns = [])
     {
-        $stats = $this->query()->orderByDesc('id')->get();
+        $stats = $this->query()
+            ->orderByDesc('id')
+            ->when(! empty($columns),function ($query) use ($columns){
+                return $query->select(array_merge(['da_stats.*'], $columns));
+            })
+            ->get();
 
         $this->resetModelQuery(); // prevent further chaining
 
         return $stats;
     }
+
+    public function eloquent(): Model
+    {
+        return $this->model;
+    }
+
+    public function dbTable(): string
+    {
+        return $this->model->getTable();
+    }
+
 
     /**
      * Exception
@@ -330,12 +352,12 @@ class DatabaseStatsStore implements StatsInterface
     {
         return $this->model->create(
             [
-                'isolation_id' => $this->isolate ? $this->isolation_id : null,
+                'isolation_id'   => $this->isolate ? $this->isolation_id : null,
                 'isolation_name' => $this->isolate ? $this->isolation_name
                     : null,
-                'title' => $this->title,
-                'key' => $this->key,
-                'value' => $value,
+                'title'          => $this->title,
+                'key'            => $this->key,
+                'value'          => $value,
             ]
         );
     }

@@ -3,6 +3,8 @@
 
 namespace RadiateCode\DaStats\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
+
 interface StatsInterface
 {
     public function isolate(string $name, int $id): StatsInterface;
@@ -19,7 +21,9 @@ interface StatsInterface
 
     public function inKeys(...$keys): StatsInterface;
 
-    public function join(string $table,string $pk = 'id',array $select = []): StatsInterface;
+    public function joinWith(string $table, string $pk = 'id');
+
+    public function join($table, $first, $operator, $second): StatsInterface;
 
     public function contain(string $key): StatsInterface;
 
@@ -27,7 +31,11 @@ interface StatsInterface
 
     public function paginate(int $perPage);
 
-    public function get();
+    public function get(array $columns = []);
 
     public function remove(): bool;
+
+    public function eloquent(): Model;
+
+    public function dbTable(): string;
 }

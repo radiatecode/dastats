@@ -420,11 +420,12 @@ Here are available methods
 | `inKeys(...$key)` | return stats object | find stats by multiple keys
 |`find()` | return mixed or eloquent collection | find specific stats
 |`paginate(int $perPage = 10)` | return mixed or eloquent collection | get stats by paginate
-|`get()` | return mixed or eloquent collection | get stats
+|`get(array $columns = [])` | return mixed or eloquent collection | get stats data, argument used to select table columns
 | `exists(callable $existsCallback = null,callable $notExistsCallback = null)`| return true/false if args empty     | we can apply stats operation based on exist condition by passing args, 1st arg works when stats exists, 2nd arg works when stats not exists. If no args pass then it simply return true/false.
 |`remove()`| return true or false | remove particular stats
 | `when(bool $value,callable $callback,callable $default = null)`| return stats object     | conditionally apply stats operation
-| `join(string $table,string $pk,array $select = [])`| return stats object | if stats key is id of another table then join the table
+| `joinWith(string $table,string $pk = 'id')`| return stats object | join the table with stats table
+| `join($table, $first, $operator = null, $second = null)`| return stats object | join more than one table with stats
 
 ## Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
