@@ -283,7 +283,7 @@ class DatabaseStatsStore implements StatsInterface
     public function get(array $columns = [])
     {
         $stats = $this->query()
-            ->orderByDesc('id')
+            ->orderByDesc('da_stats.id')
             ->select(array_merge(['da_stats.*'], $columns))
             ->get();
 
