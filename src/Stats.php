@@ -153,7 +153,7 @@ class Stats
      */
     public function join($table, $first, $operator = null, $second = null): Stats
     {
-        $this->storage->joinWith($table, $first, $operator, $second);
+        $this->storage->join($table, $first, $operator, $second);
 
         return $this;
     }

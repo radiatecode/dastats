@@ -284,9 +284,7 @@ class DatabaseStatsStore implements StatsInterface
     {
         $stats = $this->query()
             ->orderByDesc('id')
-            ->when(! empty($columns),function ($query) use ($columns){
-                return $query->select(array_merge(['da_stats.*'], $columns));
-            })
+            ->select(array_merge(['da_stats.*'], $columns))
             ->get();
 
         $this->resetModelQuery(); // prevent further chaining
