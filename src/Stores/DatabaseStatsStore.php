@@ -294,17 +294,6 @@ class DatabaseStatsStore implements StatsInterface
         return $stats;
     }
 
-    public function eloquent(): Model
-    {
-        return $this->model;
-    }
-
-    public function dbTable(): string
-    {
-        return $this->model->getTable();
-    }
-
-
     /**
      * Exception
      */

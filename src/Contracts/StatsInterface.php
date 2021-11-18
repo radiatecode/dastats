@@ -3,8 +3,6 @@
 
 namespace RadiateCode\DaStats\Contracts;
 
-use Illuminate\Database\Eloquent\Model;
-
 interface StatsInterface
 {
     public function isolate(string $name, int $id): StatsInterface;
@@ -34,8 +32,4 @@ interface StatsInterface
     public function get(array $columns = []);
 
     public function remove(): bool;
-
-    public function eloquent(): Model;
-
-    public function dbTable(): string;
 }

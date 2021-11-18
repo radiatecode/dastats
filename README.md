@@ -172,7 +172,7 @@ You can publish config file (optional)
 
 ## Usages
 
-####  Stats increase:
+###  Stats increase:
 Increase stats for given key and title.
 ```php 
 Stats::title('Your Title')->key('your-key')->increase(); 
@@ -181,7 +181,7 @@ Stats::title('Your Title')->key('your-key')->increase();
 
 > Under the hood **increase()** check is there any stats exits for the given key & title, if yes it will increment, if not it will create new record
 
-####  Stats decrease:
+###  Stats decrease:
 
 Decrease stats value for given key.
 ```php 
@@ -194,7 +194,7 @@ Stats::title('Your Title')->key('your-key')->decrease();
 > Decrease method decrease a stats by **1 (default)**, But you can decrease by any specific value.
 
 > Under the hood **decrease()** checks stats existence, if found it will decrement otherwise return null. During decrement if the decrement comes at zero it will delete the stats record from the storage.
-####  Stats replace:
+###  Stats replace:
 In some cases we need to replace our existing stats value in those cases replace() can be used
 ```php 
 Stats::key('your-key')->replace($value);
@@ -203,16 +203,15 @@ or
 ```php 
 Stats::title('Your Title')->key('your-key')->replace($value);
 ```
-###  Find Stats:
-**Get stats by keys**
+### Get stats by keys
 ```php 
 Stats::inKeys('key-1','key-2')->get();
 ```
-**Paginate**
+### Paginate
 ```php 
 Stats::inKeys('key-1','key-2')->paginate(10);
 ```
-**Find single stats**
+### Find single stats
 ```php 
 Stats::title('Title 1')->key('key-1')->find();
 ```    
@@ -220,7 +219,7 @@ or
 ```php 
 Stats::key('key-1')->find();
 ```
-**Check stats existence**
+### Check stats existence
 ```php 
 Stats::title('Title 1')->key('key-1')->exists(); // return true/false
 ```
@@ -237,7 +236,7 @@ Stats::title('Title')->key('key-1')->exists(
 );
 ```   
 
-**Get stats by contains a part of key**
+### Get stats by contains a part of key
 ```php 
 Stats::contain('partOfkey')->get();
 
@@ -255,7 +254,25 @@ or
 ```php 
 Stats::inKeys('key-1','key-2','key-3')->remove();
 ```
-
+### Join stats
+Join stats table with other db tables
+#### joinWith()
+joinWith used to join a db table with stats table
+```php
+Stats::joinWith('products', 'id') // joining products table
+    ->title('inventory')
+    ->get(['products.product_name', 'products.product_unit']);
+```
+#### join()
+join as many tables as you want like regular laravel db join
+```php
+Stats::joinWith('products', 'id') // joining products table
+    ->join('categories','categories.id','=','products.category_id') // join categories table with products
+    ->join('units','units.id','=','products.unit_id') // join units table with products
+    ->title('inventory')
+    ->get(['products.product_name', 'products.product_unit','categories.category_name','units.unit_name']);
+```
+> Note: get() method accept an array as an argument where it executes as db **'select'** statement 
 ###  Isolate stats:
 Isolation can be useful for SaaS applications, certain stats can be stored for individual user or organisation or tenant.
 ```php 
