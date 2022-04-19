@@ -3,13 +3,13 @@
 
 namespace RadiateCode\DaStats\Jobs;
 
-use RadiateCode\DaStats\Facades\Stats;
 use Illuminate\Bus\Queueable;
+use InvalidArgumentException;
+use Illuminate\Queue\SerializesModels;
+use RadiateCode\DaStats\Facades\Stats;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use InvalidArgumentException;
 
 class SingleStatsJob implements ShouldQueue
 {
@@ -33,13 +33,13 @@ class SingleStatsJob implements ShouldQueue
      * @param  string  $action
      * @param  string  $title
      * @param  string  $key
-     * @param  int  $value
+     * @param  float  $value
      *
      * --------------------------------------
      * $action = StatsAction::INCREASE; | [ex: StatsAction::INCREASE,StatsAction::DECREASE]
      *
      */
-    public function __construct(string $action,string $title,string $key,int $value = 1)
+    public function __construct(string $action,string $title,string $key,float $value = 1)
     {
         if ( ! in_array(strtolower($action), ['increase', 'decrease', 'replace'])) {
             throw new InvalidArgumentException("Invalid [{$action}] action!");

@@ -57,31 +57,31 @@ class Stats
     }
 
     /**
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return bool
      */
-    public function increase(int $value = 1): bool
+    public function increase(float $value = 1): bool
     {
         return $this->storage->increase($value);
     }
 
     /**
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return bool
      */
-    public function decrease(int $value = 1): bool
+    public function decrease(float $value = 1): bool
     {
         return $this->storage->decrease($value);
     }
 
     /**
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return bool
      */
-    public function replace(int $value): bool
+    public function replace(float $value): bool
     {
         return $this->storage->replace($value);
     }

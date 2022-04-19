@@ -108,11 +108,11 @@ class DatabaseStatsStore implements StatsInterface
     /**
      * Add stats value
      *
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return bool
      */
-    public function increase(int $value): bool
+    public function increase(float $value): bool
     {
         $this->metaDataException();
 
@@ -128,7 +128,7 @@ class DatabaseStatsStore implements StatsInterface
             return true;
         }
 
-        $stats->update(['value' => (int) $stats->value + $value]);
+        $stats->update(['value' => (float) $stats->value + $value]);
 
         return true;
     }
@@ -137,11 +137,11 @@ class DatabaseStatsStore implements StatsInterface
     /**
      * Subtract stats value
      *
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return bool
      */
-    public function decrease(int $value): bool
+    public function decrease(float $value): bool
     {
         $this->metaDataException();
 
@@ -151,11 +151,13 @@ class DatabaseStatsStore implements StatsInterface
             return false;
         }
 
-        if ($stats->value < $value || $value < 0) {
+        $statsValue =  (float) $stats->value;
+
+        if ($statsValue < $value || $value < 0) {
             throw new InvalidArgumentException('Subtract value is Out of Bounds!');
         }
 
-        $decrement = (int) $stats->value - $value;
+        $decrement = $statsValue - $value;
 
         if ($decrement == 0) {
             $stats->delete();
@@ -168,7 +170,7 @@ class DatabaseStatsStore implements StatsInterface
         return true;
     }
 
-    public function replace(int $value): bool
+    public function replace(float $value): bool
     {
         $this->metaDataException();
 
@@ -331,17 +333,16 @@ class DatabaseStatsStore implements StatsInterface
     }
 
     /**
-     * @param  int  $value
+     * @param  float  $value
      *
      * @return mixed
      */
-    private function create(int $value)
+    private function create(float $value)
     {
         return $this->model->create(
             [
                 'isolation_id'   => $this->isolate ? $this->isolation_id : null,
-                'isolation_name' => $this->isolate ? $this->isolation_name
-                    : null,
+                'isolation_name' => $this->isolate ? $this->isolation_name : null,
                 'title'          => $this->title,
                 'key'            => $this->key,
                 'value'          => $value,

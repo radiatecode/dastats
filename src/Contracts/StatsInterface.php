@@ -11,11 +11,11 @@ interface StatsInterface
 
     public function key(string $key): StatsInterface;
 
-    public function increase(int $value): bool;
+    public function increase(float $value): bool;
 
-    public function decrease(int $value): bool;
+    public function decrease(float $value): bool;
 
-    public function replace(int $value): bool;
+    public function replace(float $value): bool;
 
     public function inKeys(...$keys): StatsInterface;
 

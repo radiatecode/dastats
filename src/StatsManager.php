@@ -3,9 +3,9 @@
 
 namespace RadiateCode\DaStats;
 
-use RadiateCode\DaStats\Stores\DatabaseStatsStore;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Model;
+use RadiateCode\DaStats\Stores\DatabaseStatsStore;
 
 class StatsManager
 {
